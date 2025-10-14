@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.UserFeatures.Queries;
 
-public class GetUserByIdQuery : IRequest<User>
+public record GetUserByIdQuery(Guid userId) : IRequest<User>
 {
-    public Guid Id { get; set; }
+
 
     public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, User>
     {
@@ -20,7 +20,8 @@ public class GetUserByIdQuery : IRequest<User>
 
         public async Task<User> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.Where(a => a.Id == request.Id).FirstOrDefaultAsync();
+            var Id = request.userId;
+            var user = await _context.Users.Where(a => a.Id == Id).FirstOrDefaultAsync();
             if (user == null) return null;
             return user;
         }

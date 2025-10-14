@@ -1,6 +1,7 @@
 using Api.Services;
 using Application;
 using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using DataAccess.EFCore;
 using DataAccess.EFCore.Context;
 using DataAccess.EFCore.Repositories;
@@ -19,29 +20,29 @@ builder.Services.AddEndpointsApiExplorer();
 
 #region Swagger
 
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1",
-        new OpenApiInfo
+    // Lấy thông tin về các phiên bản API đã được định nghĩa
+    var apiVersionDescriptionProvider =
+        builder.Services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+
+    // Vòng lặp để tạo một Swagger Document cho mỗi phiên bản API
+    foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+    {
+        options.SwaggerDoc(description.GroupName, new OpenApiInfo
         {
-            Version = "v1",
-            Title = "MyApi"
+            Title = $"API của tôi phiên bản {description.ApiVersion}",
+            Version = description.ApiVersion.ToString()
         });
+    }
 });
 
 #endregion
 
 #region Services
+
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddSingleton<IUriService>(o =>
-{
-    var accessor = o.GetRequiredService<IHttpContextAccessor>();
-    var request = accessor.HttpContext.Request;
-    var uri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
-    return new UriService(uri);
-});
-
+builder.Services.AddScoped<IUriService, UriService>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -49,15 +50,24 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 #region API Versioning
 
-builder.Services.AddApiVersioning(config =>
-{
-    //Specify the default API Version as 1.0
-    config.DefaultApiVersion = new ApiVersion(1, 0);
-    // If the client hasn't specified the API version in the request, use the default API version number
-    config.AssumeDefaultVersionWhenUnspecified = true;
-    // Advertise the API versions supported for the particular endpoint
-    config.ReportApiVersions = true;
-});
+// 1. Cấu hình API Versioning với tên mới
+builder.Services.AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true;
+        // Cấu hình cách đọc version từ URL
+        options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    })
+// 2. PHẦN QUAN TRỌNG NHẤT: Dùng AddApiExplorer thay vì AddVersionedApiExplorer
+    .AddApiExplorer(options =>
+    {
+        // Định dạng tên version trong Swagger UI: v1, v2, ...
+        options.GroupNameFormat = "'v'VVV";
+
+        // Tự động thay thế tham số version trong route
+        options.SubstituteApiVersionInUrl = true;
+    });
 
 #endregion
 
@@ -68,7 +78,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        // Lấy lại thông tin các phiên bản API
+        var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+        // Tạo một endpoint trong Swagger UI cho mỗi phiên bản
+        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+        }
+    });
 }
 
 app.UseHttpsRedirection();

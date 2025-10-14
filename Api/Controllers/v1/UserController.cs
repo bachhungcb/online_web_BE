@@ -1,4 +1,6 @@
 ﻿using Api.Filter;
+using Api.Helpers;
+using Api.Services;
 using Api.Wrappers;
 using Application.Features.UserFeatures.Commands;
 using Application.Features.UserFeatures.Queries;
@@ -11,6 +13,13 @@ namespace Api.Controllers.v1;
 [ApiVersion("1.0")]
 public class UserController : BaseApiController
 {
+    private readonly IUriService _uriService;
+
+    public UserController(IUriService uriService)
+    {
+        _uriService = uriService;
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateUser(CreateUserCommand command)
     {
@@ -20,15 +29,24 @@ public class UserController : BaseApiController
     [HttpGet]
     public async Task<IActionResult> GetAllUsers([FromQuery] PaginationFilter filter)
     {
+        var route = Request.Path.Value;
         var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
-        var response = await Mediator.Send(new GetAllUserQuery(validFilter.PageNumber, validFilter.PageSize));
-        return Ok(new PagedResponse<IEnumerable<User>>(response, validFilter.PageNumber, validFilter.PageSize));
+        var response = (await Mediator.Send(new GetAllUserQuery(validFilter.PageNumber, validFilter.PageSize)))
+            .ToList();
+        var totalRecords = response.Count;
+        var returnResponse =
+            PaginationHelper.CreatePagedReponse<User>(  response,
+                                                        validFilter,
+                                                        totalRecords,
+                                                        _uriService,
+                                                        route);
+        return Ok(returnResponse);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(Guid id)
     {
-        return Ok(await Mediator.Send(new GetUserByIdQuery { Id = id }));
+        return Ok(await Mediator.Send(new GetUserByIdQuery(id)));
     }
 
     [HttpDelete("{id}")]
@@ -44,6 +62,7 @@ public class UserController : BaseApiController
         {
             return BadRequest();
         }
+
         return Ok(await Mediator.Send(command));
     }
 }
