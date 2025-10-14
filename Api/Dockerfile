@@ -1,29 +1,41 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
+# Stage 1: Base - Dùng cho môi trường runtime cuối cùng
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 42069
+EXPOSE 42070
 
-
-# This stage is used to build the service project
+# Stage 2: Build - Biên dịch và build toàn bộ solution
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Api/Api.csproj", "Api/"]
-RUN dotnet restore "./Api/Api.csproj"
-COPY . .
-WORKDIR "/src/Api"
-RUN dotnet build "./Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
+# Sao chép file solution (.sln) và tất cả các file project (.csproj) trước tiên
+# SỬA LẠI TÊN FILE .SLN CHO ĐÚNG VỚI DỰ ÁN CỦA BẠN
+COPY ["OnlineWebAndService.sln", "."]
+COPY ["Api/Api.csproj", "Api/"]
+COPY ["DataAccess.EFCore/DataAccess.EFCore.csproj", "DataAccess.EFCore/"]
+COPY ["Application/Application.csproj", "Application/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+# Nếu bạn có project Domain riêng, hãy thêm dòng COPY cho nó ở đây
+
+# Chạy restore trên file solution. Đây là cách làm đúng.
+# Nó sẽ đọc "bản đồ" và restore cho tất cả các project.
+RUN dotnet restore "OnlineWebAndService.sln"
+
+# Sao chép toàn bộ source code còn lại
+COPY . .
+
+# Build toàn bộ solution
+# WORKDIR không cần thiết ở đây, vì build từ solution sẽ tự tìm các project
+RUN dotnet build "OnlineWebAndService.sln" -c $BUILD_CONFIGURATION --no-restore
+
+# Stage 3: Publish - Chỉ publish project Api
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Chỉ định rõ project cần publish
+RUN dotnet publish "Api/Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish --no-build
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+# Stage 4: Final - Tạo image cuối cùng, gọn nhẹ để chạy
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

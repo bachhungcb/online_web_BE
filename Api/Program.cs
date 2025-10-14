@@ -3,11 +3,7 @@ using Application;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using DataAccess.EFCore;
-using DataAccess.EFCore.Context;
-using DataAccess.EFCore.Repositories;
-using DataAccess.EFCore.UnitOfWork;
 using Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -91,7 +87,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
