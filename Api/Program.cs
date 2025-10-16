@@ -3,7 +3,6 @@ using Application;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using DataAccess.EFCore;
-using Domain.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
