@@ -8,7 +8,10 @@ public record CreateUserCommand(
     string UserName,
     string Email,
     string FullName,
-    string Password) : IRequest<Guid>
+    string Password,
+    string AvatarUrl,
+    string Bio,
+    string Phone) : IRequest<Guid>
 {
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
     {
@@ -24,12 +27,17 @@ public record CreateUserCommand(
         public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             var hashedPassword = _passwordHasher.HashPassword(request.Password);
+            var createdAt = DateTime.UtcNow;
             var user = new User
             {
                 FullName = request.FullName,
                 Email = request.Email,
                 UserName = request.UserName,
-                PasswordHash = hashedPassword
+                PasswordHash = hashedPassword,
+                AvatarUrl = request.AvatarUrl,
+                Bio = request.Bio,
+                Phone = request.Phone,
+                CreatedAt = createdAt,
             };
             _context.Users.Add(user);
             await _context.SaveChanges();

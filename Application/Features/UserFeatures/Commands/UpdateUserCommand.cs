@@ -10,6 +10,10 @@ public class UpdateUserCommand : IRequest<Guid>
     public string UserName { get; set; }
     public string FullName { get; set; }
     public string Email { get; set; }
+    public string AvatarUrl { get; set; }
+    public string Bio { get; set; }
+    public string Phone { get; set; }
+
     
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Guid>
     {
@@ -23,6 +27,7 @@ public class UpdateUserCommand : IRequest<Guid>
         public async Task<Guid> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _context.Users.Where(u => u.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
+            var updatedAt = DateTime.UtcNow;
             if (user == null)
             {
                 return Guid.Empty;
@@ -32,6 +37,10 @@ public class UpdateUserCommand : IRequest<Guid>
                 user.FullName = request.FullName;
                 user.Email = request.Email;
                 user.UserName = request.UserName;
+                user.AvatarUrl = request.AvatarUrl;
+                user.Bio = request.Bio;
+                user.Phone = request.Phone;
+                user.UpdatedAt = updatedAt;
                 await _context.SaveChanges();
                 return user.Id;
             }

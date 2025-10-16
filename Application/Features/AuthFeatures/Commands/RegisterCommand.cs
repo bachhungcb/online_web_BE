@@ -9,7 +9,10 @@ public record RegisterCommand(
     string UserName,
     string Email,
     string Password,
-    string ConfirmPassword) : IRequest<Guid>
+    string ConfirmPassword,
+    string AvatarUrl,
+    string Bio,
+    string Phone) : IRequest<Guid>
 {
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Guid>
     {
@@ -41,9 +44,12 @@ public record RegisterCommand(
             var userId = await _mediator.Send(new CreateUserCommand(request.UserName,
                 request.Email,
                 request.FullName,
-                request.Password
+                request.Password,
+                request.AvatarUrl,
+                request.Bio,
+                request.Phone
             ), cancellationToken);
-            
+
             return userId;
         }
     }
