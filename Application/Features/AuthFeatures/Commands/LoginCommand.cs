@@ -1,6 +1,5 @@
 ﻿using Application.Features.UserFeatures.Queries;
 using Application.Interfaces;
-using Application.Utils;
 using MediatR;
 
 namespace Application.Features.AuthFeatures.Commands;

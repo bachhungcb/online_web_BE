@@ -1,12 +1,6 @@
-﻿using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using System.Text;
 using Application.Interfaces;
-using Application.Utils;
-
 namespace Application;
 
 public static class DependencyInjection
@@ -17,7 +11,11 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddAutoMapper(cfg =>
+        {
+            // Cấu hình bổ sung (nếu cần) ở đây
+            // Bỏ trống nếu không cần
+        }, Assembly.GetExecutingAssembly());
     }
+    
 }

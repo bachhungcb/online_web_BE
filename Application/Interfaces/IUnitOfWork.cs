@@ -2,6 +2,8 @@
 
 public interface IUnitOfWork : IDisposable
 {
-   
-    int Complete();
+   IUserRepository UserRepository { get; }
+
+   Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    Task<int> Complete();
 }

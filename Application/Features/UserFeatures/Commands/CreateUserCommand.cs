@@ -15,19 +15,24 @@ public record CreateUserCommand(
 {
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher _passwordHasher;
 
-        public CreateUserCommandHandler(IApplicationDbContext context, IPasswordHasher passwordHasher)
+        public CreateUserCommandHandler(
+            IUnitOfWork unitOfWork, 
+            IPasswordHasher passwordHasher)
         {
             _passwordHasher = passwordHasher;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
+            // 1. Create hash password
             var hashedPassword = _passwordHasher.HashPassword(request.Password);
             var createdAt = DateTime.UtcNow;
+            
+            // 2. Create Entity
             var user = new User
             {
                 FullName = request.FullName,
@@ -39,8 +44,14 @@ public record CreateUserCommand(
                 Phone = request.Phone,
                 CreatedAt = createdAt,
             };
-            _context.Users.Add(user);
-            await _context.SaveChanges();
+            
+            // 3. Add to Repository
+            _unitOfWork.UserRepository.Add(user);
+            
+            // 4. Save to DB
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            
+            // 5. Return Id
             return user.Id;
         }
     }

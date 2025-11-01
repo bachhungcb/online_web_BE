@@ -16,6 +16,7 @@ COPY ["Api/Api.csproj", "Api/"]
 COPY ["DataAccess.EFCore/DataAccess.EFCore.csproj", "DataAccess.EFCore/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Tools/Tools.csproj", "Tools/"]
 # Nếu bạn có project Domain riêng, hãy thêm dòng COPY cho nó ở đây
 
 # Chạy restore trên file solution. Đây là cách làm đúng.

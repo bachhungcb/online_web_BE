@@ -22,4 +22,9 @@ public class User : BaseEntity
     
     // Danh sách những người đã kết bạn với User này (User này là UserB)
     public ICollection<Friend> FriendedBy { get; set; }
+    
+    //For password reset
+    public string? PasswordResetToken { get; set; }
+    public DateTime? ResetTokenExpires { get; set; }
+    
 }

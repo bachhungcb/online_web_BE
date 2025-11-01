@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Api.DTO;
+namespace Api.DTO.Users;
 
-public class UpdateUserDTO
+public class UpdateUserDto
 {
     [MaxLength(100)]
     public string UserName { get; set; }

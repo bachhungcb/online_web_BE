@@ -4,6 +4,8 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using DataAccess.EFCore;
 using Microsoft.OpenApi.Models;
+using Tools;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -52,7 +54,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUriService, UriService>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-
+builder.Services.AddTools();
 #endregion
 
 #region API Versioning

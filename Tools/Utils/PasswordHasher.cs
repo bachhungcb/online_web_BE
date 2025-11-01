@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces;
 using DevOne.Security.Cryptography.BCrypt;
 
-namespace Application.Utils;
+namespace Tools.Utils;
 
 public class PasswordHasher : IPasswordHasher
 {

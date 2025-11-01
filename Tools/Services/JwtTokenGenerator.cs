@@ -1,6 +1,4 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
 using Application.Interfaces;
@@ -8,7 +6,7 @@ using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Application.Utils;
+namespace Tools.Services;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
