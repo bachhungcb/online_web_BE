@@ -6,6 +6,7 @@ using DataAccess.EFCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // Add services to the container.
 
@@ -30,6 +31,17 @@ builder.Services.AddSwaggerGen(options =>
             Version = description.ApiVersion.ToString()
         });
     }
+});
+
+#endregion
+
+#region CORS
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy => { policy.WithOrigins("*"); }
+    );
 });
 
 #endregion
@@ -81,13 +93,14 @@ if (app.Environment.IsDevelopment())
         // Tạo một endpoint trong Swagger UI cho mỗi phiên bản
         foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
         {
-            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                description.GroupName.ToUpperInvariant());
         }
     });
 }
 
 // app.UseHttpsRedirection();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 
 app.MapControllers();
