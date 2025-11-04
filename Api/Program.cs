@@ -42,9 +42,14 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy => { policy.WithOrigins("*"); }
+        policy => {
+            policy.AllowAnyOrigin() 
+                .AllowAnyMethod() 
+                .AllowAnyHeader(); 
+        }
     );
 });
+
 
 #endregion
 
