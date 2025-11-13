@@ -4,7 +4,7 @@ namespace Application.Interfaces;
 
 public interface IGenericRepository<T> where T : class
 {
-    T GetById(Guid Id);
+    Task<T?> GetById(Guid Id);
     IEnumerable<T> GetAll();
     IEnumerable<T> Find(Expression<Func<T, bool>> expression);
     void Add(T entity);

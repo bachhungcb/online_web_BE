@@ -8,11 +8,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.AuthFeatures.Commands;
 
-public class ForgotPasswordCommand : IRequest<bool>
+public class SendResetPasswordMailCommand : IRequest<bool>
 {
     public string Email { get; set; }
 
-    public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand, bool>
+    public class ForgotPasswordCommandHandler : IRequestHandler<SendResetPasswordMailCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailSevice;
@@ -34,7 +34,7 @@ public class ForgotPasswordCommand : IRequest<bool>
             _token = token;
         }
 
-        public async Task<bool> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(SendResetPasswordMailCommand request, CancellationToken cancellationToken)
         {
             var user = await _mediator.Send(new GetUserByEmailQuery(request.Email), cancellationToken);
 

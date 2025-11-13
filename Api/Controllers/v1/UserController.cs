@@ -76,47 +76,5 @@ public class UserController : BaseApiController
         return Ok(await _mediator.Send(command));
     }
 
-    [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordDto dto)
-    {
-        
-        // 1. Create command from dto
-        var command = new ForgotPasswordCommand{Email = dto.Email};
-        
-        // 2. Send command to Handler
-        await _mediator.Send(command);
-        
-        
-        return Ok(new
-        {
-            Message = "We have send you a reset password email"
-        });
-    }
-
-    [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
-    {
-        // 1. Create command from dto
-        var command = new ResetPasswordCommand
-        {
-            Token = dto.Token,
-            Password = dto.Password,
-            ConfirmPassword = dto.ConfirmPassword,
-        };
-        
-        // 2. Send command and handle exception
-        try
-        {
-            await _mediator.Send(command);
-            return Ok(new
-            {
-                message = "Reset password successfully"
-            });
-            
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new {message = ex.Message});
-        }
-    }
+   
 }
