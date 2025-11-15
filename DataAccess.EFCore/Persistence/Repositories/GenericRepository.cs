@@ -19,13 +19,14 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _dbContext.Set<T>().FindAsync(Id);
     }
 
-    public IEnumerable<T> GetAll()
+    public IQueryable<T> GetAllAsQueryable()
     {
         // Trả về DbSet (cho phép lọc tiếp trên CSDL).
         // Thêm AsNoTracking() để tối ưu cho các hoạt động CHỈ ĐỌC,
         // nó bảo EF Core không cần theo dõi các đối tượng này.
         return _dbContext.Set<T>().AsNoTracking();
     }
+    
 
     public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
     {

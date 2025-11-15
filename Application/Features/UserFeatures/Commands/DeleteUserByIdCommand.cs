@@ -12,18 +12,19 @@ public class DeleteUserByIdCommand : IRequest<Guid>
     public class DeleteUserByIdCommandHandler : IRequestHandler<DeleteUserByIdCommand, Guid>
     {
         private readonly IApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteUserByIdCommandHandler(IApplicationDbContext context)
+        public DeleteUserByIdCommandHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Guid> Handle(DeleteUserByIdCommand request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.Where(u => u.Id == request.Id).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var user = await _unitOfWork.UserRepository.GetById(request.Id);
             if (user == null) return Guid.Empty;
-            _context.Users.Remove(user);
-            await _context.SaveChanges();
+            _unitOfWork.UserRepository.Remove(user);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return user.Id;
         }
     }

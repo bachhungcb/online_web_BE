@@ -18,15 +18,16 @@ public class UpdateUserCommand : IRequest<Guid>
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Guid>
     {
         private readonly IApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UpdateUserCommandHandler(IApplicationDbContext context)
+        public UpdateUserCommandHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Guid> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.Where(u => u.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
+            var user = await _unitOfWork.UserRepository.GetById(request.Id);
             var updatedAt = DateTime.UtcNow;
             if (user == null)
             {
@@ -41,7 +42,7 @@ public class UpdateUserCommand : IRequest<Guid>
                 user.Bio = request.Bio;
                 user.Phone = request.Phone;
                 user.UpdatedAt = updatedAt;
-                await _context.SaveChanges();
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return user.Id;
             }
         }

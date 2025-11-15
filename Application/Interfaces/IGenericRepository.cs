@@ -5,7 +5,7 @@ namespace Application.Interfaces;
 public interface IGenericRepository<T> where T : class
 {
     Task<T?> GetById(Guid Id);
-    IEnumerable<T> GetAll();
+    IQueryable<T> GetAllAsQueryable();
     IEnumerable<T> Find(Expression<Func<T, bool>> expression);
     void Add(T entity);
     void AddRange(IEnumerable<T> entities);

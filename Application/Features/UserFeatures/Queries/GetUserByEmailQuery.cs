@@ -10,21 +10,21 @@ public record GetUserByEmailQuery(string email) : IRequest<User>
 {
     public class GetUserByEmailHandler : IRequestHandler<GetUserByEmailQuery, User>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public GetUserByEmailHandler(
-            IApplicationDbContext context,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         public async Task<User> Handle(GetUserByEmailQuery request, CancellationToken cancellationToken)
         {
             var Email = request.email;
-            var user = await _context.Users.Where(u => u.Email == Email).FirstOrDefaultAsync();
+            var user = await _unitOfWork.UserRepository.FindByEmailAsync(Email);
             if (user == null) return null;
             return user;
         }

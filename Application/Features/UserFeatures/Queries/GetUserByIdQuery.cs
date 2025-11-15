@@ -11,17 +11,17 @@ public record GetUserByIdQuery(Guid userId) : IRequest<User>
 
     public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, User>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GetUserByIdHandler(IApplicationDbContext context)
+        public GetUserByIdHandler(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<User> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
             var Id = request.userId;
-            var user = await _context.Users.Where(a => a.Id == Id).FirstOrDefaultAsync();
+            var user = await _unitOfWork.UserRepository.GetById(Id);
             if (user == null) return null;
             return user;
         }
