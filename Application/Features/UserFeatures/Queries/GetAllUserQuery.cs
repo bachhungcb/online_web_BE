@@ -11,7 +11,7 @@ public record GetAllUserQuery(int PageNumber, int PageSize) : IRequest<IEnumerab
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public GetAllUserQueryHandler(IApplicationDbContext context, IUnitOfWork unitOfWork)
+        public GetAllUserQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }

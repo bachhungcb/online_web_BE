@@ -17,7 +17,6 @@ public class UpdateUserCommand : IRequest<Guid>
     
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Guid>
     {
-        private readonly IApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
 
         public UpdateUserCommandHandler(IUnitOfWork unitOfWork)

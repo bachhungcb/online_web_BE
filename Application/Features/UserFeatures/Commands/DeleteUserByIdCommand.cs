@@ -11,7 +11,6 @@ public class DeleteUserByIdCommand : IRequest<Guid>
 
     public class DeleteUserByIdCommandHandler : IRequestHandler<DeleteUserByIdCommand, Guid>
     {
-        private readonly IApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
 
         public DeleteUserByIdCommandHandler(IUnitOfWork unitOfWork)
