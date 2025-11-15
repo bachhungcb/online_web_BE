@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Service;
 using DevOne.Security.Cryptography.BCrypt;
 
 namespace Tools.Utils;

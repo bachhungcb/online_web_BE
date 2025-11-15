@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Application.Interfaces;
+using Application.Interfaces.Service;
 
 namespace Tools.Utils;
 

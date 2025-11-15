@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Service;
 using DataAccess.EFCore.Persistence;
 using DataAccess.EFCore.Persistence.Repositories;
 using Microsoft.Extensions.Configuration;

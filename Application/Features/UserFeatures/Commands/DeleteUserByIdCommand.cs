@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Application.Interfaces;
+using Application.Interfaces.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

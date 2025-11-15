@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Application.Interfaces;
+using Application.Interfaces.Repositories;
 using DataAccess.EFCore.Context;
 using Microsoft.EntityFrameworkCore;
 

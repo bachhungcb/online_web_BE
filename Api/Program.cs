@@ -1,9 +1,12 @@
+using System.Text;
 using Api.Services;
 using Application;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using DataAccess.EFCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Tools;
 
 
@@ -42,14 +45,14 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy => {
-            policy.AllowAnyOrigin() 
-                .AllowAnyMethod() 
-                .AllowAnyHeader(); 
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
         }
     );
 });
-
 
 #endregion
 
@@ -60,6 +63,7 @@ builder.Services.AddScoped<IUriService, UriService>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTools();
+
 #endregion
 
 #region API Versioning
@@ -81,6 +85,34 @@ builder.Services.AddApiVersioning(options =>
 
         // Tự động thay thế tham số version trong route
         options.SubstituteApiVersionInUrl = true;
+    });
+
+#endregion
+
+#region Authentication
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            // (Tùy chọn) Xác thực Issuer, Audience - nên dùng trong Production
+            // ValidateIssuer = true,
+            // ValidateAudience = true,
+            // ValidAudience = builder.Configuration["Jwt:Audience"],
+            // ValidIssuer = builder.Configuration["Jwt:Issuer"],
+
+            //IMPORTANT: Key validation
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty)
+            ),
+            ValidateLifetime = true,
+        };
     });
 
 #endregion
@@ -108,6 +140,8 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

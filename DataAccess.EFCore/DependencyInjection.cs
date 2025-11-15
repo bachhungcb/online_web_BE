@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Repositories;
 using DataAccess.EFCore.Context;
 using DataAccess.EFCore.Persistence;
 using DataAccess.EFCore.Persistence.Repositories;

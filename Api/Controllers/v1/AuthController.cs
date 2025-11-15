@@ -1,5 +1,5 @@
-﻿using Api.DTO.Users;
-using Api.Services;
+﻿using Api.Services;
+using Application.DTO.Users;
 using Application.Features.AuthFeatures.Commands;
 using Asp.Versioning;
 using MediatR;

@@ -1,9 +1,8 @@
-﻿using Api.DTO.Users;
-using Api.Filter;
+﻿using Api.Filter;
 using Api.Helpers;
 using Api.Services;
 using Api.Wrappers;
-using Application.Features.AuthFeatures.Commands;
+using Application.DTO.Users;
 using Application.Features.UserFeatures.Commands;
 using Application.Features.UserFeatures.Queries;
 using Asp.Versioning;
@@ -40,12 +39,12 @@ public class UserController : BaseApiController
             .ToList();
         var totalRecords = response.Count;
         var returnResponse =
-            PaginationHelper.CreatePagedReponse<User>(  response,
-                                                        validFilter,
-                                                        totalRecords,
-                                                        _uriService,
-                                                        route);
-        return Ok(returnResponse);
+            PaginationHelper.CreatePagedReponse<User>(response,
+                validFilter,
+                totalRecords,
+                _uriService,
+                route);
+        return Ok(new { UserList = returnResponse });
     }
 
     [HttpGet("{id}")]
@@ -61,7 +60,7 @@ public class UserController : BaseApiController
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateUser([FromRoute]Guid id,[FromBody]UpdateUserDto dto)
+    public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UpdateUserDto dto)
     {
         var command = new UpdateUserCommand
         {
@@ -75,6 +74,4 @@ public class UserController : BaseApiController
         };
         return Ok(await _mediator.Send(command));
     }
-
-   
 }

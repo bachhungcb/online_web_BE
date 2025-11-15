@@ -4,6 +4,8 @@ using MediatR;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Features.UserFeatures.Commands;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Service;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.AuthFeatures.Commands;
