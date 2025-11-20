@@ -5,11 +5,10 @@ using MediatR;
 namespace Application.Features.FriendFeatures.Commands;
 
 public record AcceptFriendRequestCommand(
-    Guid FriendRequestId, 
+    Guid FriendRequestId,
     Guid ReceiverId) : IRequest<bool>;
 
-public class AcceptFriendRequestCommandHandler 
-    : IRequestHandler<AcceptFriendRequestCommand, bool>
+public class AcceptFriendRequestCommandHandler : IRequestHandler<AcceptFriendRequestCommand, bool>
 {
     private readonly IUnitOfWork _unitOfWork;
 

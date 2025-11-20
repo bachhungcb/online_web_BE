@@ -1,4 +1,5 @@
 using System.Text;
+using Api.Hubs;
 using Api.Services;
 using Application;
 using Asp.Versioning;
@@ -63,6 +64,8 @@ builder.Services.AddScoped<IUriService, UriService>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTools();
+
+builder.Services.AddSignalR();
 
 #endregion
 
@@ -145,5 +148,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

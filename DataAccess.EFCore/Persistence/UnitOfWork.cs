@@ -17,6 +17,9 @@ public class UnitOfWork : IUnitOfWork
     public IUserRepository UserRepository { get; }
     public IFriendRepository FriendRepository { get; }
     public IFriendRequestRepository FriendRequestRepository { get; }
+    public IMessageRepository MessageRepository { get; }
+    public IConversationRepository ConversationRepository { get; }
+    
     #endregion
 
     // 3. Constructor
@@ -29,6 +32,8 @@ public class UnitOfWork : IUnitOfWork
         UserRepository = new UserRepository(_context);
         FriendRepository = new FriendRepository(_context);
         FriendRequestRepository = new FriendRequestRepository(_context);
+        MessageRepository = new MessageRepository(_context);
+        ConversationRepository = new ConversationRepository(_context);
     }
 
     // 4. Triển khai SaveChangesAsync

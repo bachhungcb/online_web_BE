@@ -29,9 +29,4 @@
     <ProjectReference Include="..\Tools\Tools.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTO\Friends\" />
-    <Folder Include="DTO\Users\" />
-  </ItemGroup>
-
 </Project>
