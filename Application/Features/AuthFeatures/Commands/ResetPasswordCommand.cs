@@ -47,7 +47,7 @@ public class ResetPasswordCommand : IRequest<bool>
             var user = await _unitOfWork.UserRepository.FindByResetTokenAsync(hashedToken);
 
             // 4. Token validation
-            if (user == null || user.ResetTokenExpires <= DateTime.UtcNow)
+            if (user == null || user.ResetTokenExpires <= DateTime.Now)
             {
                 throw new Exception("Invalid token or token is expired.");
             }

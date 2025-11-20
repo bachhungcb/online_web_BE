@@ -28,7 +28,7 @@ public class UpdateUserCommand : IRequest<Guid>
         public async Task<Guid> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _unitOfWork.UserRepository.GetById(request.Id);
-            var updatedAt = DateTime.UtcNow;
+            var updatedAt = DateTime.Now;
             if (user == null)
             {
                 return Guid.Empty;

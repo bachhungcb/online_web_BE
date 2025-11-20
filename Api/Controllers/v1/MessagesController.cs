@@ -41,7 +41,7 @@ public class MessagesController : BaseApiController
             { 
                 SenderId = senderId, 
                 Content = dto.Content, 
-                Timestamp = DateTime.UtcNow 
+                Timestamp = DateTime.Now 
             });
 
         return Ok(new { message = "Sent successfully" });

@@ -32,7 +32,7 @@ public record CreateUserCommand(
         {
             // 1. Create hash password
             var hashedPassword = _passwordHasher.HashPassword(request.Password);
-            var createdAt = DateTime.UtcNow;
+            var createdAt = DateTime.Now;
             
             // 2. Create Entity
             var user = new User
