@@ -12,15 +12,25 @@ public class FriendRequestRepository : GenericRepository<FriendRequest>, IFriend
     }
 
     // Lấy các request đã nhận
-    public Task<IEnumerable<FriendRequest>> GetReceivedRequestsAsync(Guid receiverId)
+    public async Task<IEnumerable<FriendRequest>> GetReceivedRequestsAsync(Guid receiverId)
     {
-        throw new NotImplementedException();
+        return await _dbContext.FriendRequests
+            .AsNoTracking()
+            .Where(fr => fr.ReceiverId == receiverId) // Lọc theo người nhận
+            .Include(fr => fr.Sender)                 // Kèm thông tin người gửi (để lấy tên/avatar)
+            .OrderByDescending(fr => fr.CreatedAt)    // Mới nhất lên đầu
+            .ToListAsync();
     }
 
     // Lấy các request đã gửi
-    public Task<IEnumerable<FriendRequest>> GetSentRequestsAsync(Guid senderId)
+    public async Task<IEnumerable<FriendRequest>> GetSentRequestsAsync(Guid senderId)
     {
-        throw new NotImplementedException();
+        return await _dbContext.FriendRequests
+            .AsNoTracking()
+            .Where(fr => fr.SenderId == senderId)     // Lọc theo người gửi
+            .Include(fr => fr.Receiver)               // Kèm thông tin người nhận
+            .OrderByDescending(fr => fr.CreatedAt)
+            .ToListAsync();
     }
 
     // Kiểm tra request đã tồn tại chưa

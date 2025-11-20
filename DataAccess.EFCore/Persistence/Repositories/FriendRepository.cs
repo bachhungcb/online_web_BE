@@ -12,9 +12,14 @@ public class FriendRepository : GenericRepository<Friend>, IFriendRepository
         
     }
 
-    public Task<IEnumerable<Friend>> GetFriendsListAsync(Guid userId)
+    public async Task<IEnumerable<Friend>> GetFriendsListAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Friends
+            .AsNoTracking()
+            .Where(f => f.UserA == userId || f.UserB == userId)
+            .Include(f => f.FriendA) // <--- QUAN TRỌNG: Load thông tin User A
+            .Include(f => f.FriendB) // <--- QUAN TRỌNG: Load thông tin User B
+            .ToListAsync();
     }
 
     public Task<Friend?> GetFriendshipAsync(Guid userId1, Guid userId2)

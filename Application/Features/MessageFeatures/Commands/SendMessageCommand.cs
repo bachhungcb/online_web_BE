@@ -31,8 +31,31 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, boo
         var conversation = await _unitOfWork.ConversationRepository.GetById(request.ConversationId);
         if (conversation == null) throw new Exception("Conversation not found");
         
-        // (Thêm logic check Participants ở đây nếu cần)
+        // Check participant
+        if (!conversation.Participants.Contains(request.SenderId))
+        {
+            throw new Exception("You are not a member of this conversation");
+        }
 
+        if (conversation.Type == ConversationType.direct)
+        {
+            // Tìm ID của người kia (Người nhận) trong danh sách Participants
+            // Participants chứa [SenderId, ReceiverId], ta lọc lấy người không phải SenderId
+            var receiverId = conversation.Participants.FirstOrDefault(p => p != request.SenderId);
+
+            // Nếu tìm thấy người nhận (trường hợp bình thường)
+            if (receiverId != Guid.Empty)
+            {
+                // Gọi Repository để kiểm tra quan hệ bạn bè
+                var isFriend = await _unitOfWork.FriendRepository.IsFriendAsync(request.SenderId, receiverId);
+
+                if (!isFriend)
+                {
+                    // Nếu không phải bạn bè -> Chặn luôn
+                    throw new Exception("Message sending failed. You are not friends with this user.");
+                }
+            }
+        }
         // 2. Tạo Message Entity
         var message = new Message
         {
@@ -52,7 +75,9 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, boo
             CreatedAt = message.CreatedAt
         };
         conversation.UpdatedAt = DateTime.UtcNow; // Đẩy cuộc trò chuyện lên đầu
-
+        
+        conversation.SeenBy = new List<Guid> { request.SenderId };
+        
         // 4. Lưu vào DB (Transaction)
         _unitOfWork.MessageRepository.Add(message);
         _unitOfWork.ConversationRepository.Update(conversation);

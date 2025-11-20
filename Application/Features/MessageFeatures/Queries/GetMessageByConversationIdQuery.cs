@@ -7,6 +7,7 @@ namespace Application.Features.MessageFeatures.Queries;
 
 public record GetMessagesByConversationIdQuery(
     Guid ConversationId,
+    Guid CurrentUserId,
     int PageNumber,
     int PageSize
 ) : IRequest<IEnumerable<MessageDto>>; 
@@ -25,13 +26,26 @@ public class GetMessagesByConversationIdQueryHandler
         GetMessagesByConversationIdQuery request, 
         CancellationToken cancellationToken)
     {
+        // 1. Kiểm tra người dùng có thuộc cuộc trò chuyện này không
+        var conversation = await _unitOfWork.ConversationRepository.GetById(request.ConversationId);
+        
+        if (conversation == null)
+        {
+            // Trả về rỗng hoặc throw exception tùy bạn
+            return new List<MessageDto>(); 
+        }
+        
         // 2. Gọi hàm Repository chuyên biệt vừa viết ở Bước 2
         var messages = await _unitOfWork.MessageRepository.GetMessagesByConversationIdAsync(
             request.ConversationId,
             request.PageNumber,
             request.PageSize
         );
-
+        
+        if (!conversation.Participants.Contains(request.CurrentUserId))
+        {
+            throw new Exception("Access denied. You are not a member of this conversation.");
+        }
         // Lưu ý: messages có thể rỗng (cuộc trò chuyện chưa có tin nhắn), 
         // nhưng không được null. Nếu null thì Repository đang sai.
         

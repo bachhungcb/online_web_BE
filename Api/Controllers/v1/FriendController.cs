@@ -20,7 +20,7 @@ public class FriendController : BaseApiController
     }
 
     [HttpPost("requests")]
-    public async Task<IActionResult> SendFriendRequest([FromBody] SendFriendRequestDto dto) 
+    public async Task<IActionResult> SendFriendRequest([FromBody] SendFriendRequestDto dto)
     {
         var senderId = CurrentUserId;
 
@@ -63,8 +63,8 @@ public class FriendController : BaseApiController
             return NotFound(new { message = ex.Message });
         }
     }
-    
-    
+
+
     [HttpPost("requests/{id:guid}/accept")]
     public async Task<IActionResult> AcceptFriendRequest(Guid id)
     {
@@ -103,10 +103,69 @@ public class FriendController : BaseApiController
             return BadRequest(new { message = ex.Message });
         }
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> GetFriendList()
     {
-        throw new NotImplementedException();
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        // 2. Tạo Query (Bạn cần chắc chắn đã tạo Query này ở tầng Application chưa, nếu chưa xem Bước 2)
+        // Giả sử bạn đã có GetFriendListQuery như chúng ta thảo luận trước đó
+        var query = new GetFriendListQuery(currentUserId);
+
+        // 3. Gửi đi
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách các lời mời kết bạn mà mình ĐÃ NHẬN
+    /// </summary>
+    [HttpGet("requests/received")]
+    public async Task<IActionResult> GetReceivedFriendRequests()
+    {
+        // 1. Lấy ID người dùng hiện tại từ Token
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        // 2. Tạo Query
+        var query = new GetReceivedFriendRequestsQuery(currentUserId);
+
+        // 3. Gửi qua Mediator
+        try
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// (Tùy chọn) Lấy danh sách các lời mời mà mình ĐÃ GỬI đi
+    /// </summary>
+    [HttpGet("requests/sent")]
+    public async Task<IActionResult> GetSentFriendRequests()
+    {
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        // 2. Tạo Query
+        var query = new GetSentFriendRequestQuery(currentUserId);
+
+        // 3. Gửi qua Mediator
+        try
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

@@ -1,0 +1,85 @@
+﻿using Application.DTO.Conversations;
+using Application.Interfaces.Repositories;
+using Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace Application.Features.ConversationFeatures.Queries;
+
+public record GetConversationListQuery(Guid CurrentUserId) 
+    : IRequest<IEnumerable<ConversationDto>>;
+
+public class GetConversationListQueryHandler 
+    : IRequestHandler<GetConversationListQuery, IEnumerable<ConversationDto>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GetConversationListQueryHandler(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<IEnumerable<ConversationDto>> Handle(
+        GetConversationListQuery request, 
+        CancellationToken cancellationToken)
+    {
+        // 1. Lấy danh sách cuộc trò chuyện từ DB
+        var conversations = await _unitOfWork.ConversationRepository
+            .GetConversationsByUserIdAsync(request.CurrentUserId);
+
+        // 2. Lấy danh sách ID của "người kia" trong các cuộc chat DIRECT
+        // Để query thông tin User một lần (tránh lỗi N+1 Query)
+        var directChatUserIds = conversations
+            .Where(c => c.Type == ConversationType.direct)
+            .SelectMany(c => c.Participants)
+            .Where(p => p != request.CurrentUserId)
+            .Distinct()
+            .ToList();
+
+        // 3. Lấy thông tin Users từ DB
+        var usersDict = (await _unitOfWork.UserRepository.GetAllAsQueryable()
+            .Where(u => directChatUserIds.Contains(u.Id))
+            .ToListAsync(cancellationToken)) // ToListAsync trả về List<User>
+            .ToDictionary(u => u.Id);    // Chuyển sang Dictionary để tra cứu cho nhanh
+
+        // 4. Map sang DTO
+        var dtos = new List<ConversationDto>();
+
+        foreach (var convo in conversations)
+        {
+            string name = "Unknown";
+            string avatar = "";
+
+            if (convo.Type == ConversationType.group)
+            {
+                name = convo.Group?.Name ?? "Unnamed Group";
+                // avatar = convo.Group.AvatarUrl ... (nếu có)
+            }
+            else // Direct
+            {
+                // Tìm ID người kia
+                var partnerId = convo.Participants.FirstOrDefault(p => p != request.CurrentUserId);
+                
+                // Tra cứu thông tin trong Dictionary đã lấy ở bước 3
+                if (usersDict.TryGetValue(partnerId, out var partner))
+                {
+                    name = partner.FullName; // Hoặc UserName
+                    avatar = partner.AvatarUrl;
+                }
+            }
+
+            dtos.Add(new ConversationDto
+            {
+                Id = convo.Id,
+                Name = name,
+                AvatarUrl = avatar,
+                LastMessageContent = convo.LastMessage?.Content ?? "Start a conversation",
+                LastMessageTime = convo.LastMessage?.CreatedAt ?? convo.CreatedAt,
+                // Kiểm tra xem mình đã xem chưa
+                IsRead = convo.SeenBy.Contains(request.CurrentUserId) 
+            });
+        }
+
+        return dtos;
+    }
+}

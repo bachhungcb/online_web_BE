@@ -37,6 +37,32 @@ builder.Services.AddSwaggerGen(options =>
             Version = description.ApiVersion.ToString()
         });
     }
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Vui lòng nhập token vào ô bên dưới (không cần từ Bearer, chỉ cần token)",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+
+    // Áp dụng Security Requirement (Yêu cầu bảo mật cho toàn bộ API)
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
 });
 
 #endregion
@@ -48,9 +74,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy
+                .WithOrigins("http://localhost:3000",
+                    "http://localhost:5173") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
                 .AllowAnyMethod()
-                .AllowAnyHeader();
+                .AllowAnyHeader()
+                .AllowCredentials(); // <--- BẮT BUỘC PHẢI CÓ CHO SIGNALR
         }
     );
 });
@@ -115,6 +144,9 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty)
             ),
             ValidateLifetime = true,
+            
+            ValidateIssuer = false,   // Không kiểm tra người phát hành
+            ValidateAudience = false
         };
     });
 

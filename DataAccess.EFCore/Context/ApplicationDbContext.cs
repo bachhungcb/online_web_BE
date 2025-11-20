@@ -1,6 +1,8 @@
-﻿using Application.Interfaces;
+﻿using System.Text.Json;
+using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DataAccess.EFCore.Context;
 
@@ -16,7 +18,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<FriendRequest> FriendRequests { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Conversation> Conversation { get; set; }
-    
+
 
     public async Task<int> SaveChanges()
     {
@@ -30,6 +32,33 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         // Cấu hình Conversation entity
         modelBuilder.Entity<Conversation>(builder =>
         {
+            // ▼▼▼ THÊM CẤU HÌNH NÀY ▼▼▼
+
+            // Cấu hình Participants: List<Guid> <-> JSON String
+            builder.Property(c => c.Participants)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Convert to DB
+                    v => JsonSerializer.Deserialize<List<Guid>>(v, (JsonSerializerOptions)null) ??
+                         new List<Guid>() // Convert from DB
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<Guid>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
+
+            // Cấu hình SeenBy: List<Guid> <-> JSON String (Tương tự)
+            builder.Property(c => c.SeenBy)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<Guid>>(v, (JsonSerializerOptions)null) ?? new List<Guid>()
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<Guid>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
+
+            // ▲▲▲ KẾT THÚC CẤU HÌNH ▲▲▲
+
             // Định nghĩa rằng 'Group' là một owned entity
             // và dữ liệu của nó sẽ được lưu trong cùng bảng với Conversation
             builder.OwnsOne(conversation => conversation.Group, ownedNavigationBuilder =>
