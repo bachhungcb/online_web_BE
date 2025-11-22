@@ -27,7 +27,7 @@ public class MessagesController : BaseApiController
         var command = new SendMessageCommand(senderId, dto.ConversationId, dto.Content);
         try 
         {
-            await Mediator.Send(command);
+            await _mediator.Send(command);
         }
         catch (Exception ex)
         {
@@ -40,11 +40,16 @@ public class MessagesController : BaseApiController
             .SendAsync("ReceiveMessage", new 
             { 
                 SenderId = senderId, 
-                Content = dto.Content, 
-                Timestamp = DateTime.Now 
+                content = dto.Content, 
+                Timestamp = DateTime.Now,
+                conversationId = dto.ConversationId
             });
 
-        return Ok(new { message = "Sent successfully" });
+        return Ok(new
+        {
+            message = "Sent successfully",
+            conversationId = dto.ConversationId
+        });
     }
     
     /// <summary>

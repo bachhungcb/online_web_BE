@@ -55,7 +55,7 @@ public class FriendController : BaseApiController
         var query = new GetFriendRequestByIdQuery(id, currentUserId);
         try
         {
-            var result = await Mediator.Send(query);
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
         catch (Exception ex)
@@ -74,7 +74,7 @@ public class FriendController : BaseApiController
         var command = new AcceptFriendRequestCommand(id, currentUserId);
         try
         {
-            var result = await Mediator.Send(command);
+            var result = await _mediator.Send(command);
             if (result)
                 return Ok(new { message = "Accept friend request successfully" });
             else
