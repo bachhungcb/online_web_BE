@@ -33,7 +33,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         var token = new JwtSecurityToken(
             claims: claims,
             signingCredentials: creds,
-            expires: DateTime.Now.AddHours(1));
+            expires: DateTime.UtcNow.AddHours(1));
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

@@ -76,7 +76,8 @@ builder.Services.AddCors(options =>
         {
             policy
                 .WithOrigins("http://localhost:3000",
-                    "http://localhost:5173") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
+                    "http://localhost:5173",
+                    "http://localhost:5126") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials(); // <--- BẮT BUỘC PHẢI CÓ CHO SIGNALR
@@ -144,8 +145,8 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty)
             ),
             ValidateLifetime = true,
-            
-            ValidateIssuer = false,   // Không kiểm tra người phát hành
+
+            ValidateIssuer = false, // Không kiểm tra người phát hành
             ValidateAudience = false
         };
     });

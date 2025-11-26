@@ -1,4 +1,5 @@
 ﻿using Application.DTO.Conversations;
+using Application.DTO.Users;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using MediatR;
@@ -6,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.ConversationFeatures.Queries;
 
-public record GetConversationListQuery(Guid CurrentUserId) 
+public record GetConversationListQuery(Guid CurrentUserId)
     : IRequest<IEnumerable<ConversationDto>>;
 
-public class GetConversationListQueryHandler 
+public class GetConversationListQueryHandler
     : IRequestHandler<GetConversationListQuery, IEnumerable<ConversationDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -20,7 +21,7 @@ public class GetConversationListQueryHandler
     }
 
     public async Task<IEnumerable<ConversationDto>> Handle(
-        GetConversationListQuery request, 
+        GetConversationListQuery request,
         CancellationToken cancellationToken)
     {
         // 1. Lấy danh sách cuộc trò chuyện từ DB
@@ -30,17 +31,15 @@ public class GetConversationListQueryHandler
         // 2. Lấy danh sách ID của "người kia" trong các cuộc chat DIRECT
         // Để query thông tin User một lần (tránh lỗi N+1 Query)
         var directChatUserIds = conversations
-            .Where(c => c.Type == ConversationType.direct)
             .SelectMany(c => c.Participants)
-            .Where(p => p != request.CurrentUserId)
             .Distinct()
             .ToList();
 
         // 3. Lấy thông tin Users từ DB
         var usersDict = (await _unitOfWork.UserRepository.GetAllAsQueryable()
-            .Where(u => directChatUserIds.Contains(u.Id))
-            .ToListAsync(cancellationToken)) // ToListAsync trả về List<User>
-            .ToDictionary(u => u.Id);    // Chuyển sang Dictionary để tra cứu cho nhanh
+                .Where(u => directChatUserIds.Contains(u.Id))
+                .ToListAsync(cancellationToken)) // ToListAsync trả về List<User>
+            .ToDictionary(u => u.Id); // Chuyển sang Dictionary để tra cứu cho nhanh
 
         // 4. Map sang DTO
         var dtos = new List<ConversationDto>();
@@ -49,7 +48,20 @@ public class GetConversationListQueryHandler
         {
             string name = "Unknown";
             string avatar = "";
-
+            // Logic lấy danh sách participants cho DTO
+            var participantDtos = convo.Participants
+                .Where(uid => usersDict.ContainsKey(uid)) // Check an toàn
+                .Select(uid =>
+                {
+                    var u = usersDict[uid];
+                    return new UserSummaryDto
+                    {
+                        Id = u.Id,
+                        UserName = u.UserName,
+                        AvatarUrl = u.AvatarUrl
+                    };
+                }).ToList();
+            
             if (convo.Type == ConversationType.group)
             {
                 name = convo.Group?.Name ?? "Unnamed Group";
@@ -59,7 +71,7 @@ public class GetConversationListQueryHandler
             {
                 // Tìm ID người kia
                 var partnerId = convo.Participants.FirstOrDefault(p => p != request.CurrentUserId);
-                
+
                 // Tra cứu thông tin trong Dictionary đã lấy ở bước 3
                 if (usersDict.TryGetValue(partnerId, out var partner))
                 {
@@ -76,7 +88,8 @@ public class GetConversationListQueryHandler
                 LastMessageContent = convo.LastMessage?.Content ?? "Start a conversation",
                 LastMessageTime = convo.LastMessage?.CreatedAt ?? convo.CreatedAt,
                 // Kiểm tra xem mình đã xem chưa
-                IsRead = convo.SeenBy.Contains(request.CurrentUserId) 
+                IsRead = convo.SeenBy.Contains(request.CurrentUserId),
+                Participants = participantDtos,
             });
         }
 

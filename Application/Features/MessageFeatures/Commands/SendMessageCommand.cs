@@ -62,8 +62,8 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, boo
             SenderId = request.SenderId,
             ConversationId = request.ConversationId,
             Content = request.Content,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         // 3. Cập nhật LastMessage cho Conversation (Để hiển thị ở danh sách chat)
@@ -74,7 +74,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, boo
             Sender = request.SenderId,
             CreatedAt = message.CreatedAt
         };
-        conversation.UpdatedAt = DateTime.Now; // Đẩy cuộc trò chuyện lên đầu
+        conversation.UpdatedAt = DateTime.UtcNow; // Đẩy cuộc trò chuyện lên đầu
         
         conversation.SeenBy = new List<Guid> { request.SenderId };
         

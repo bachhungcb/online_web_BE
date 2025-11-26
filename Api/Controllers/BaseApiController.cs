@@ -28,4 +28,19 @@ public abstract class BaseApiController : ControllerBase
             return Guid.Empty;
         }
     }
+
+    protected string CurrentUserName
+    {
+        get
+        {
+            var UserName = User.FindFirstValue("UserName");
+
+            if (UserName == null)
+            {
+                return string.Empty;
+            }
+
+            return UserName;
+        }
+    }
 }

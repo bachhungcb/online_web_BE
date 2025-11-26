@@ -48,8 +48,8 @@ public class AcceptFriendRequestCommandHandler : IRequestHandler<AcceptFriendReq
         {
             UserA = fr.SenderId,
             UserB = fr.ReceiverId,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
         _unitOfWork.FriendRepository.Add(newFriend);
 

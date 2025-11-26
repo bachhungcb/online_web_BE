@@ -1,5 +1,7 @@
 ﻿using Api.Hubs;
+using Application.DTO.Conversations;
 using Application.DTO.Messages;
+using Application.Features.ConversationFeatures.Queries;
 using Application.Features.MessageFeatures.Commands;
 using Application.Features.MessageFeatures.Queries;
 using MediatR;
@@ -12,7 +14,8 @@ public class MessagesController : BaseApiController
 {
     private readonly IHubContext<ChatHub> _hubContext;
     private readonly IMediator _mediator;
-    public MessagesController(IMediator mediator, IHubContext<ChatHub> hubContext) 
+
+    public MessagesController(IMediator mediator, IHubContext<ChatHub> hubContext)
     {
         _hubContext = hubContext;
         _mediator = mediator;
@@ -22,10 +25,9 @@ public class MessagesController : BaseApiController
     public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
     {
         var senderId = CurrentUserId; // Lấy từ Token
-
         // 1. Lưu vào DB qua MediatR
         var command = new SendMessageCommand(senderId, dto.ConversationId, dto.Content);
-        try 
+        try
         {
             await _mediator.Send(command);
         }
@@ -37,28 +39,52 @@ public class MessagesController : BaseApiController
         // 2. Gửi Real-time qua SignalR
         // Gửi sự kiện "ReceiveMessage" đến group có tên là ConversationId
         await _hubContext.Clients.Group(dto.ConversationId.ToString())
-            .SendAsync("ReceiveMessage", new 
-            { 
-                SenderId = senderId, 
-                content = dto.Content, 
-                Timestamp = DateTime.Now,
+            .SendAsync("ReceiveMessage", new
+            {
+                SenderId = senderId,
+                content = dto.Content,
+                Timestamp = DateTime.UtcNow,
                 conversationId = dto.ConversationId
             });
 
+        var getConversationCommand = new GetConversationByIdQuery(dto.ConversationId,senderId);
+        ConversationDto conversation;
+        try
+        {
+            conversation = await _mediator.Send(getConversationCommand);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        var partner = conversation.Participants
+            .FirstOrDefault(u => u.Id != senderId);
+        Guid partnerId = default;
+        
+        if (partner != null)
+        {
+            partnerId = partner.Id; 
+            // Bây giờ bạn có thể dùng partnerId để làm gì đó (VD: Gửi thông báo riêng)
+        }
+        
         return Ok(new
         {
             message = "Sent successfully",
-            conversationId = dto.ConversationId
+            SenderId = CurrentUserId,
+            ReceiverId = partnerId,
+            ReceiverUserName = partner.UserName ??  string.Empty,
+            content = dto.Content,
+            CreatedAt = DateTime.UtcNow,
         });
     }
-    
+
     /// <summary>
     /// Lấy lịch sử tin nhắn của một cuộc trò chuyện (Có phân trang)
     /// </summary>
     [HttpGet("{conversationId}")]
     public async Task<IActionResult> GetMessages(
-        Guid conversationId, 
-        [FromQuery] int pageNumber = 1, 
+        Guid conversationId,
+        [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20)
     {
         var currentUserId = CurrentUserId;
@@ -66,9 +92,9 @@ public class MessagesController : BaseApiController
 
         // Tạo Query với CurrentUserId để check bảo mật
         var query = new GetMessagesByConversationIdQuery(
-            conversationId, 
-            currentUserId, 
-            pageNumber, 
+            conversationId,
+            currentUserId,
+            pageNumber,
             pageSize
         );
 

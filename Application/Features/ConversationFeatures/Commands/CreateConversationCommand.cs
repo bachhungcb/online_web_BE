@@ -54,8 +54,8 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
                 CreatedAt = DateTime.MinValue 
             },
             SeenBy = new List<Guid> { request.SenderId }, // Người tạo coi như đã xem
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         _unitOfWork.ConversationRepository.Add(newConversation);

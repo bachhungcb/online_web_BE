@@ -54,7 +54,7 @@ public class SendResetPasswordMailCommand : IRequest<bool>
 
             // 3. Save hased token to DB            
             user.PasswordResetToken = hashedToken;
-            user.ResetTokenExpires = DateTime.Now.AddMinutes(15);
+            user.ResetTokenExpires = DateTime.UtcNow.AddMinutes(15);
             
             // 4. Update user
             _unitOfWork.UserRepository.Update(user);

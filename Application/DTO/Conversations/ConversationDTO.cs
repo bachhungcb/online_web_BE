@@ -1,4 +1,6 @@
-﻿namespace Application.DTO.Conversations;
+﻿using Application.DTO.Users;
+
+namespace Application.DTO.Conversations;
 
 public class ConversationDto
 {
@@ -8,4 +10,6 @@ public class ConversationDto
     public string LastMessageContent { get; set; }
     public DateTime LastMessageTime { get; set; }
     public bool IsRead { get; set; } // Đã đọc tin nhắn mới nhất chưa?
+    
+    public List<UserSummaryDto> Participants { get; set; }
 }

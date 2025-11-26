@@ -74,8 +74,8 @@ public record SendFriendRequestCommand(
                 SenderId = request.SenderId,
                 ReceiverId = request.ReceiverId,
                 Message = request.Message,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             // Thêm vào Repository (chưa ghi vào CSDL)
