@@ -1,4 +1,6 @@
-﻿using Application.DTO.Messages;
+﻿using Application.DTO.Conversations;
+using Application.DTO.Messages;
+using Application.Features.ConversationFeatures.Queries;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using MediatR;
@@ -49,6 +51,24 @@ public class GetMessagesByConversationIdQueryHandler
         // Lưu ý: messages có thể rỗng (cuộc trò chuyện chưa có tin nhắn), 
         // nhưng không được null. Nếu null thì Repository đang sai.
         
+        // 2.1. Get receiver info
+        
+        var receiverId = conversation.Participants.FirstOrDefault(x => x != request.CurrentUserId);
+
+        // 2.2. Get detail Receiver detail
+        string receiverName = "Unknown";
+        string receiverAvatar = "";
+        
+        if (receiverId != Guid.Empty)
+        {
+            // Gọi Repository để lấy thông tin User từ bảng Users
+            var receiverUser = await _unitOfWork.UserRepository.GetById(receiverId);
+            if (receiverUser != null)
+            {
+                receiverName = receiverUser.UserName;
+                receiverAvatar = receiverUser.AvatarUrl;
+            }
+        }
         // 3. Map từ Entity sang DTO
         var messageDtos = messages.Select(m => new MessageDto
         {
@@ -56,6 +76,9 @@ public class GetMessagesByConversationIdQueryHandler
             SenderId = m.SenderId,
             SenderName = m.Sender?.UserName ?? "Unknown", // Lấy từ bảng User nhờ .Include()
             SenderAvatarUrl = m.Sender?.AvatarUrl,
+            ReceiverId = receiverId,
+            ReceiverName = receiverName,
+            ReceiverAvatarUrl = receiverAvatar,
             Content = m.Content,
             CreatedAt = m.CreatedAt
         });

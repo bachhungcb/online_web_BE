@@ -47,7 +47,7 @@ public class MessagesController : BaseApiController
                 conversationId = dto.ConversationId
             });
 
-        var getConversationCommand = new GetConversationByIdQuery(dto.ConversationId,senderId);
+        var getConversationCommand = new GetConversationByIdQuery(dto.ConversationId, senderId);
         ConversationDto conversation;
         try
         {
@@ -57,31 +57,32 @@ public class MessagesController : BaseApiController
         {
             return BadRequest(ex.Message);
         }
-        var partner = conversation.Participants
-            .FirstOrDefault(u => u.Id != senderId);
-        Guid partnerId = default;
-        
-        if (partner != null)
-        {
-            partnerId = partner.Id; 
-            // Bây giờ bạn có thể dùng partnerId để làm gì đó (VD: Gửi thông báo riêng)
-        }
-        
+        var receiver = conversation.Participants?.FirstOrDefault(p => p.Id != senderId);
+    
+        // Nếu chat với chính mình (Self-chat) hoặc không tìm thấy, receiver sẽ là null.
+        // Dùng Null Coalescing (??) để xử lý giá trị mặc định.
+        var receiverId = receiver?.Id; 
+        var receiverName = receiver?.UserName ?? "Unknown";
+
         return Ok(new
         {
             message = "Sent successfully",
-            SenderId = CurrentUserId,
-            ReceiverId = partnerId,
-            ReceiverUserName = partner.UserName ??  string.Empty,
+            SenderId = senderId, // CurrentUserId
+        
+            // Trả về thông tin Receiver
+            ReceiverId = receiverId, 
+            ReceiverUserName = receiverName,
+        
             content = dto.Content,
             CreatedAt = DateTime.UtcNow,
+            
         });
     }
 
     /// <summary>
     /// Lấy lịch sử tin nhắn của một cuộc trò chuyện (Có phân trang)
     /// </summary>
-    [HttpGet("{conversationId}")]
+    [HttpGet("{conversationId:guid}")]
     public async Task<IActionResult> GetMessages(
         Guid conversationId,
         [FromQuery] int pageNumber = 1,
@@ -97,7 +98,8 @@ public class MessagesController : BaseApiController
             pageNumber,
             pageSize
         );
-
+        
+       
         try
         {
             var result = await _mediator.Send(query);
