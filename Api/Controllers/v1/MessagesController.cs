@@ -25,11 +25,13 @@ public class MessagesController : BaseApiController
     public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
     {
         var senderId = CurrentUserId; // Lấy từ Token
+
+        MessageSentResultDto result;
         // 1. Lưu vào DB qua MediatR
         var command = new SendMessageCommand(senderId, dto.ConversationId, dto.Content);
         try
         {
-            await _mediator.Send(command);
+            result = await _mediator.Send(command);
         }
         catch (Exception ex)
         {
@@ -42,37 +44,21 @@ public class MessagesController : BaseApiController
             .SendAsync("ReceiveMessage", new
             {
                 SenderId = senderId,
+                receiverId = result.ReceiverId,
                 content = dto.Content,
-                Timestamp = DateTime.UtcNow,
+                Timestamp = result.CreatedAt,
                 conversationId = dto.ConversationId
             });
-
-        var getConversationCommand = new GetConversationByIdQuery(dto.ConversationId, senderId);
-        ConversationDto conversation;
-        try
-        {
-            conversation = await _mediator.Send(getConversationCommand);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        var receiver = conversation.Participants?.FirstOrDefault(p => p.Id != senderId);
-    
-        // Nếu chat với chính mình (Self-chat) hoặc không tìm thấy, receiver sẽ là null.
-        // Dùng Null Coalescing (??) để xử lý giá trị mặc định.
-        var receiverId = receiver?.Id; 
-        var receiverName = receiver?.UserName ?? "Unknown";
-
+        
         return Ok(new
         {
             message = "Sent successfully",
             SenderId = senderId, // CurrentUserId
         
             // Trả về thông tin Receiver
-            ReceiverId = receiverId, 
-            ReceiverUserName = receiverName,
-        
+            ReceiverID = result.ReceiverId, 
+            receiverUserName = result.ReceiverUserName,
+            ReceiverAvartarUrl =  result.ReceiverAvatarUrl,
             content = dto.Content,
             CreatedAt = DateTime.UtcNow,
             
