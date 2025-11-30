@@ -115,4 +115,30 @@ public class ConversationController : BaseApiController
 
         return Ok(result);
     }
+    
+    /// <summary>
+    /// Rời khỏi nhóm chat
+    /// </summary>
+    [HttpDelete("{id:guid}/leave")]
+    public async Task<IActionResult> LeaveGroup([FromRoute] Guid id)
+    {
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        var command = new LeaveGroupCommand(id, currentUserId);
+
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(new { message = "Left group successfully" });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
