@@ -32,7 +32,9 @@ public class GetConversationListQueryHandler
         // Để query thông tin User một lần (tránh lỗi N+1 Query)
         var directChatUserIds = conversations
             .SelectMany(c => c.Participants)
+            .Concat(conversations.Select(c=> c.LastMessage.Sender))
             .Distinct()
+            .Where(id=> id != Guid.Empty)
             .ToList();
 
         // 3. Lấy thông tin Users từ DB
@@ -62,6 +64,34 @@ public class GetConversationListQueryHandler
                     };
                 }).ToList();
             
+            //---- Last Sender Info ----
+            string lastSenderName = "";
+            Guid lastSenderId = Guid.Empty;
+            string lastSenderAvatarUrl = "";
+            
+            if (convo.LastMessage != null && convo.LastMessage.Sender != Guid.Empty)
+            {
+                lastSenderId = convo.LastMessage.Sender;
+            
+                // Nếu chính mình gửi thì hiển thị "Bạn:" hoặc "You:"
+                if (lastSenderId == request.CurrentUserId)
+                {
+                    lastSenderName = "You";
+                }
+                else if (usersDict.TryGetValue(lastSenderId, out var senderUser))
+                {
+                    // Nếu người khác gửi, lấy tên từ Dict
+                    // Với group chat, hiển thị tên người gửi. Với direct, cũng hiển thị tên.
+                    lastSenderName = senderUser.UserName; // Hoặc senderUser.FullName
+                    lastSenderAvatarUrl = senderUser.AvatarUrl;
+                }
+                else 
+                {
+                    lastSenderName = "Unknown"; // Trường hợp user bị xóa
+                }
+            }
+            
+            
             if (convo.Type == ConversationType.group)
             {
                 name = convo.Group?.Name ?? "Unnamed Group";
@@ -87,6 +117,9 @@ public class GetConversationListQueryHandler
                 AvatarUrl = avatar,
                 LastMessageContent = convo.LastMessage?.Content ?? "Start a conversation",
                 LastMessageTime = convo.LastMessage?.CreatedAt ?? convo.CreatedAt,
+                LastMessageSenderName = lastSenderName,
+                LastMessageSenderId = lastSenderId,
+                LassMessageSenderAvatarUrl = lastSenderAvatarUrl,
                 // Kiểm tra xem mình đã xem chưa
                 IsRead = convo.SeenBy.Contains(request.CurrentUserId),
                 Participants = participantDtos,

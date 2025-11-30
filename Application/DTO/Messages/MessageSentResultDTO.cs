@@ -4,6 +4,7 @@ public class MessageSentResultDto
 {
     public Guid MessageId { get; set; }
     public Guid SenderId { get; set; }
+    public string SenderAvatarUrl { get; set; }
     public Guid ReceiverId { get; set; }
     public string ReceiverUserName { get; set; }
     public string ReceiverAvatarUrl { get; set; }

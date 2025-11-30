@@ -54,7 +54,8 @@ public class MessagesController : BaseApiController
         {
             message = "Sent successfully",
             SenderId = senderId, // CurrentUserId
-        
+            senderAvatarUrl = result.SenderAvatarUrl,
+            conversationId = dto.ConversationId,
             // Trả về thông tin Receiver
             ReceiverID = result.ReceiverId, 
             receiverUserName = result.ReceiverUserName,

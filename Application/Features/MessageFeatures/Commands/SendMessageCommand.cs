@@ -33,6 +33,9 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         if (conversation == null) throw new Exception("Conversation not found");
         Guid receiverId = Guid.Empty;
         User receiver = null;
+        
+        // Get Sender info
+        var sender = await _unitOfWork.UserRepository.GetById(request.SenderId);
         // Check participant
         if (!conversation.Participants.Contains(request.SenderId))
         {
@@ -92,6 +95,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         return new MessageSentResultDto
         {
             SenderId = request.SenderId,
+            SenderAvatarUrl = sender.AvatarUrl,
             ReceiverId = receiverId,
             ReceiverUserName = receiver.UserName,
             ReceiverAvatarUrl = receiver.AvatarUrl,
