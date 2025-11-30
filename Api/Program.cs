@@ -2,6 +2,7 @@ using System.Text;
 using Api.Hubs;
 using Api.Services;
 using Application;
+using Application.Interfaces.Service;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using DataAccess.EFCore;
@@ -94,7 +95,7 @@ builder.Services.AddScoped<IUriService, UriService>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTools();
-
+builder.Services.AddScoped<IHubService, HubService>();
 builder.Services.AddSignalR();
 
 #endregion
