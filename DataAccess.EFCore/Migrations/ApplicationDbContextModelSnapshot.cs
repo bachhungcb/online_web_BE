@@ -123,6 +123,9 @@ namespace DataAccess.EFCore.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("MessageType")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uniqueidentifier");
 

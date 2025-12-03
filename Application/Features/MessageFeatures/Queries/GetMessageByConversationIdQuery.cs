@@ -79,6 +79,7 @@ public class GetMessagesByConversationIdQueryHandler
             ReceiverId = receiverId,
             ReceiverName = receiverName,
             ReceiverAvatarUrl = receiverAvatar,
+            Type =  m.MessageType,
             Content = m.Content,
             CreatedAt = m.CreatedAt
         });

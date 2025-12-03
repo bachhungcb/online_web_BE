@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Domain.Entities;
 
 namespace Application.DTO.Messages;
 
@@ -9,4 +10,5 @@ public class SendMessageDto
     [Required]
     public Guid ConversationId { get; set; }
     public string? Content { get; set; }
+    public MessageType MessageType { get; set; } = MessageType.Text;
 }

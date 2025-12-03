@@ -1,4 +1,6 @@
-﻿namespace Application.DTO.Messages;
+﻿using Domain.Entities;
+
+namespace Application.DTO.Messages;
 
 public class MessageDto
 {
@@ -10,5 +12,6 @@ public class MessageDto
     public string ReceiverName { get; set; }
     public string ReceiverAvatarUrl { get; set; }
     public string Content { get; set; }
+    public MessageType Type { get; set; }
     public DateTime CreatedAt { get; set; }
 }

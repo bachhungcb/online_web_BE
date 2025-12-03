@@ -20,5 +20,6 @@ public static class DependencyInjection
         // Các dịch vụ khác bạn đã có (ví dụ)
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IFileService, LocalFileService>();
     }
 }

@@ -10,7 +10,8 @@ namespace Application.Features.MessageFeatures.Commands;
 public record SendMessageCommand(
     Guid SenderId,
     Guid ConversationId,
-    string Content) : IRequest<MessageSentResultDto>;
+    string Content,
+    MessageType Type) : IRequest<MessageSentResultDto>;
 
 public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, MessageSentResultDto>
 {
@@ -68,15 +69,18 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             SenderId = request.SenderId,
             ConversationId = request.ConversationId,
             Content = request.Content,
+            MessageType =  request.Type,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
         // 3. Cập nhật LastMessage cho Conversation (Để hiển thị ở danh sách chat)
         // Entity Conversation của bạn có Owned Type LastMessageInfo
+        
+        string previewContent = request.Type == MessageType.Image ? "[Image]" : request.Content;
         conversation.LastMessage = new LastMessageInfo
         {
-            Content = request.Content,
+            Content = previewContent,
             Sender = request.SenderId,
             CreatedAt = message.CreatedAt
         };

@@ -13,6 +13,15 @@ public class Message : BaseEntity
     public string Content {get; set;}
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    
 
+    public MessageType MessageType { get; set; } = MessageType.Text;
+}
+
+public enum MessageType
+{
+    Text = 0,
+    Image = 1,
+    Video = 2,
+    File = 3,
+    System = 99
 }
