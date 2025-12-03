@@ -119,7 +119,7 @@ public class GetConversationListQueryHandler
                 LastMessageTime = convo.LastMessage?.CreatedAt ?? convo.CreatedAt,
                 LastMessageSenderName = lastSenderName,
                 LastMessageSenderId = lastSenderId,
-                LassMessageSenderAvatarUrl = lastSenderAvatarUrl,
+                LastMessageSenderAvatarUrl = lastSenderAvatarUrl,
                 // Kiểm tra xem mình đã xem chưa
                 IsRead = convo.SeenBy.Contains(request.CurrentUserId),
                 Participants = participantDtos,

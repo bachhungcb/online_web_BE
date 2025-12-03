@@ -10,7 +10,7 @@ public class ConversationDto
     public string LastMessageContent { get; set; }
     public Guid LastMessageSenderId { get; set; }
     public string LastMessageSenderName { get; set; }
-    public string LassMessageSenderAvatarUrl { get; set; }
+    public string LastMessageSenderAvatarUrl { get; set; }
     public DateTime LastMessageTime { get; set; }
     public bool IsRead { get; set; } // Đã đọc tin nhắn mới nhất chưa?
     

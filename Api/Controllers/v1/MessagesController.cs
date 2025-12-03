@@ -44,7 +44,10 @@ public class MessagesController : BaseApiController
             .SendAsync("ReceiveMessage", new
             {
                 SenderId = senderId,
+                senderAvatarUrl =  result.SenderAvatarUrl,
                 receiverId = result.ReceiverId,
+                receiverUserName = result.ReceiverUserName,
+                ReceiverAvartarUrl =  result.ReceiverAvatarUrl,
                 content = dto.Content,
                 Timestamp = result.CreatedAt,
                 conversationId = dto.ConversationId
@@ -53,16 +56,8 @@ public class MessagesController : BaseApiController
         return Ok(new
         {
             message = "Sent successfully",
-            SenderId = senderId, // CurrentUserId
-            senderAvatarUrl = result.SenderAvatarUrl,
-            conversationId = dto.ConversationId,
-            // Trả về thông tin Receiver
-            ReceiverID = result.ReceiverId, 
-            receiverUserName = result.ReceiverUserName,
-            ReceiverAvartarUrl =  result.ReceiverAvatarUrl,
             content = dto.Content,
             CreatedAt = DateTime.UtcNow,
-            
         });
     }
 
