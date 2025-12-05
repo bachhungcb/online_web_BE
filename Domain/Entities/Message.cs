@@ -11,6 +11,7 @@ public class Message : BaseEntity
     public Conversation Conversation {get; set;}
     
     public string Content {get; set;}
+    public List<string> MediaUrls { get; set; } = new List<string>();
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

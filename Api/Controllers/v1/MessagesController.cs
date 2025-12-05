@@ -28,7 +28,7 @@ public class MessagesController : BaseApiController
 
         MessageSentResultDto result;
         // 1. Lưu vào DB qua MediatR
-        var command = new SendMessageCommand(senderId, dto.ConversationId, dto.Content, dto.MessageType);
+        var command = new SendMessageCommand(senderId, dto.ConversationId, dto.Content,dto.MediaUrls, dto.MessageType);
         try
         {
             result = await _mediator.Send(command);
@@ -49,6 +49,7 @@ public class MessagesController : BaseApiController
                 receiverUserName = result.ReceiverUserName,
                 ReceiverAvartarUrl =  result.ReceiverAvatarUrl,
                 content = dto.Content,
+                mediaUrls = dto.MediaUrls,
                 type = dto.MessageType,
                 Timestamp = result.CreatedAt,
                 conversationId = dto.ConversationId

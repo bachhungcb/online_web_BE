@@ -10,5 +10,6 @@ public class SendMessageDto
     [Required]
     public Guid ConversationId { get; set; }
     public string? Content { get; set; }
+    public List<string>? MediaUrls { get; set; }
     public MessageType MessageType { get; set; } = MessageType.Text;
 }

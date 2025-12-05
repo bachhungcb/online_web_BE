@@ -10,7 +10,8 @@ namespace Application.Features.MessageFeatures.Commands;
 public record SendMessageCommand(
     Guid SenderId,
     Guid ConversationId,
-    string Content,
+    string? Content,
+    List<string>? MediaUrls,
     MessageType Type) : IRequest<MessageSentResultDto>;
 
 public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, MessageSentResultDto>
@@ -32,15 +33,21 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         // 1. Kiểm tra Conversation có tồn tại và User có trong đó không
         var conversation = await _unitOfWork.ConversationRepository.GetById(request.ConversationId);
         if (conversation == null) throw new Exception("Conversation not found");
+        var mediaUrls = request.MediaUrls ?? new List<string>();
         Guid receiverId = Guid.Empty;
         User receiver = null;
-        
+
         // Get Sender info
         var sender = await _unitOfWork.UserRepository.GetById(request.SenderId);
         // Check participant
         if (!conversation.Participants.Contains(request.SenderId))
         {
             throw new Exception("You are not a member of this conversation");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content) && !mediaUrls.Any())
+        {
+            throw new Exception("Message must contain text or media.");
         }
 
         if (conversation.Type == ConversationType.direct)
@@ -69,15 +76,32 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             SenderId = request.SenderId,
             ConversationId = request.ConversationId,
             Content = request.Content,
-            MessageType =  request.Type,
+            MediaUrls = request.MediaUrls,
+            MessageType = request.Type,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
         // 3. Cập nhật LastMessage cho Conversation (Để hiển thị ở danh sách chat)
         // Entity Conversation của bạn có Owned Type LastMessageInfo
+
+        string previewContent = "";
         
-        string previewContent = request.Type == MessageType.Image ? "[Image]" : request.Content;
+        if (!string.IsNullOrEmpty(request.Content))
+        {
+            previewContent = request.Content;
+        }
+        else if (mediaUrls.Count > 0)
+        {
+            // Ví dụ: "[3 Images]" hoặc "[Video]"
+            string typeName = request.Type == MessageType.Image ? "Photos" : "Files";
+            previewContent = $"[{mediaUrls.Count} {typeName}]";
+        }
+        else
+        {
+            previewContent = "Sent a message";
+        }
+
         conversation.LastMessage = new LastMessageInfo
         {
             Content = previewContent,

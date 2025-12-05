@@ -9,6 +9,7 @@ public class MessageSentResultDto
     public string ReceiverUserName { get; set; }
     public string ReceiverAvatarUrl { get; set; }
     public string Content { get; set; }
+    public List<string> MediaUrls { get; set; }
     public DateTime CreatedAt { get; set; }
     
 }

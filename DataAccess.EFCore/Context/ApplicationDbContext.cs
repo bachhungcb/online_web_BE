@@ -117,5 +117,19 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasForeignKey(f => f.UserB)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+        
+        modelBuilder.Entity<Message>(builder =>
+        {
+            // Cấu hình MediaUrls: List<string> <-> JSON String
+            builder.Property(m => m.MediaUrls)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Lưu vào DB
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>() // Lấy ra
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
+        });
     }
 }
