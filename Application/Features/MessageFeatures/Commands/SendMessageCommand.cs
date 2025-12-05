@@ -34,8 +34,10 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         var conversation = await _unitOfWork.ConversationRepository.GetById(request.ConversationId);
         if (conversation == null) throw new Exception("Conversation not found");
         var mediaUrls = request.MediaUrls ?? new List<string>();
+        
         Guid receiverId = Guid.Empty;
-        User receiver = null;
+        string receiverName = "";
+        string receiverAvatarUrl = "";
 
         // Get Sender info
         var sender = await _unitOfWork.UserRepository.GetById(request.SenderId);
@@ -56,18 +58,26 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             // Participants chứa [SenderId, ReceiverId], ta lọc lấy người không phải SenderId
             receiverId = conversation.Participants.FirstOrDefault(p => p != request.SenderId);
 
-            // Nếu tìm thấy người nhận (trường hợp bình thường)
             if (receiverId != Guid.Empty)
             {
-                // Gọi Repository để kiểm tra quan hệ bạn bè
+                // Check bạn bè
                 var isFriend = await _unitOfWork.FriendRepository.IsFriendAsync(request.SenderId, receiverId);
-                receiver = await _unitOfWork.UserRepository.GetById(receiverId);
-                if (!isFriend)
+                if (!isFriend) throw new Exception("Message sending failed. You are not friends with this user.");
+            
+                // Lấy info người nhận
+                var receiverUser = await _unitOfWork.UserRepository.GetById(receiverId);
+                if (receiverUser != null)
                 {
-                    // Nếu không phải bạn bè -> Chặn luôn
-                    throw new Exception("Message sending failed. You are not friends with this user.");
+                    receiverName = receiverUser.UserName;
+                    receiverAvatarUrl = receiverUser.AvatarUrl;
                 }
             }
+        }else 
+        {
+            // === LOGIC CHO GROUP CHAT ===
+            receiverId = conversation.Id;
+            receiverName = conversation.Group?.Name ?? "Unknown Group";
+            //receiver.AvatarUrl = conversation.Group?.AvatarUrl; // Nếu nhóm có avatar
         }
 
         // 2. Tạo Message Entity
@@ -101,6 +111,11 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         {
             previewContent = "Sent a message";
         }
+        
+        if (conversation.Type == ConversationType.group)
+        {
+            previewContent = $"{sender.UserName}: {previewContent}"; // Tùy chọn
+        }
 
         conversation.LastMessage = new LastMessageInfo
         {
@@ -122,12 +137,17 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         // Tuy nhiên, logic là: Sau khi save thành công -> Bắn SignalR
         return new MessageSentResultDto
         {
+            MessageId = message.Id, // Nên trả về MessageId
             SenderId = request.SenderId,
-            SenderAvatarUrl = sender.AvatarUrl,
-            ReceiverId = receiverId,
-            ReceiverUserName = receiver.UserName,
-            ReceiverAvatarUrl = receiver.AvatarUrl,
+            SenderAvatarUrl = sender?.AvatarUrl,
+        
+            // Các trường này đã được xử lý ở bước if/else trên
+            ReceiverId = receiverId, 
+            ReceiverUserName = receiverName, 
+            ReceiverAvatarUrl = receiverAvatarUrl,
+        
             Content = request.Content,
+            MediaUrls = mediaUrls, // Trả về list media để FE hiển thị ngay
             CreatedAt = message.CreatedAt,
         };
     }
