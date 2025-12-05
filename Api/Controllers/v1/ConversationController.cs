@@ -141,4 +141,48 @@ public class ConversationController : BaseApiController
             return BadRequest(new { message = ex.Message });
         }
     }
+    
+    // 1. API KICK MEMBER
+    [HttpPost("{id:guid}/kick")]
+    public async Task<IActionResult> KickMember([FromRoute] Guid id, [FromBody] KickMemberDto dto)
+    {
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        var command = new KickMemberCommand(id, currentUserId, dto.MemberId);
+
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(new { message = "Member kicked successfully" });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid(); // Trả về 403 nếu không phải Admin
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // 2. API CHANGE GROUP NAME
+    [HttpPut("{id:guid}/name")]
+    public async Task<IActionResult> ChangeGroupName([FromRoute] Guid id, [FromBody] ChangeGroupNameDto dto)
+    {
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        var command = new ChangeGroupNameCommand(id, currentUserId, dto.NewGroupName);
+
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(new { message = "Group name updated successfully", newName = dto.NewGroupName });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

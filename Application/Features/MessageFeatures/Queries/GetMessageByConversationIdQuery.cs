@@ -70,7 +70,9 @@ public class GetMessagesByConversationIdQueryHandler
             }
         }
         // 3. Map từ Entity sang DTO
-        var messageDtos = messages.Select(m => new MessageDto
+        var messageDtos = messages
+            .Where(m => m.MessageType != MessageType.System)
+            .Select(m => new MessageDto
         {
             Id = m.Id,
             SenderId = m.SenderId,
