@@ -123,8 +123,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             // Cấu hình MediaUrls: List<string> <-> JSON String
             builder.Property(m => m.MediaUrls)
                 .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Lưu vào DB
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>() // Lấy ra
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Chiều ghi vào DB (giữ nguyên)
+                    v => string.IsNullOrEmpty(v) 
+                        ? new List<string>() // <--- FIX: Nếu DB rỗng thì trả về List rỗng, KHÔNG Deserialize
+                        : JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>()
                 )
                 .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                     (c1, c2) => c1.SequenceEqual(c2),
