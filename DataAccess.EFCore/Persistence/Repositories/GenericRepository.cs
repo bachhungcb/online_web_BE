@@ -64,4 +64,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         _dbContext.Set<T>().Update(entity);
     }
+    
+    public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
+    {
+        // Truyền thẳng biểu thức điều kiện vào hàm CountAsync của DbSet
+        return await _dbContext.Set<T>().CountAsync(expression);
+    }
 }

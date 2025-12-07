@@ -85,6 +85,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
                 lastMessageBuilder.Property(messageInfo => messageInfo.Sender)
                     .HasColumnName("LastMessageSender");
+                
+                lastMessageBuilder.Property(messageInfo => messageInfo.MessageType)
+                    .HasColumnName("LastMessageType");
             });
         });
 

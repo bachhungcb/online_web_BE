@@ -44,7 +44,7 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
         {
             Id = Guid.NewGuid(),
             Participants = new List<Guid> { request.SenderId, request.ReceiverId },
-            Type = ConversationType.direct,
+            Type = ConversationType.Direct,
             // Khởi tạo các giá trị required
             Group = new GroupCreationInfo { Name = "", CreatedBy = Guid.Empty }, // Direct chat không cần Group info
             LastMessage = new LastMessageInfo // Khởi tạo rỗng

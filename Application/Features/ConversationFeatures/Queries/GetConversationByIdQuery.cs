@@ -47,7 +47,7 @@ public record GetConversationByIdQuery(Guid ConversationId, Guid CurrentUserId)
             string name = "Unknown";
             string avatar = "";
 
-            if (conversation.Type == ConversationType.group)
+            if (conversation.Type == ConversationType.Group)
             {
                 name = conversation.Group?.Name ?? "Unnamed Group";
                 // avatar = conversation.Group?.AvatarUrl;

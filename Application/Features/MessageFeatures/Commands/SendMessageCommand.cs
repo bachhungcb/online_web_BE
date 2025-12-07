@@ -52,7 +52,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             throw new Exception("Message must contain text or media.");
         }
 
-        if (conversation.Type == ConversationType.direct)
+        if (conversation.Type == ConversationType.Direct)
         {
             // Tìm ID của người kia (Người nhận) trong danh sách Participants
             // Participants chứa [SenderId, ReceiverId], ta lọc lấy người không phải SenderId
@@ -112,7 +112,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             previewContent = "Sent a message";
         }
         
-        if (conversation.Type == ConversationType.group)
+        if (conversation.Type == ConversationType.Group)
         {
             previewContent = $"{sender.UserName}: {previewContent}"; // Tùy chọn
         }

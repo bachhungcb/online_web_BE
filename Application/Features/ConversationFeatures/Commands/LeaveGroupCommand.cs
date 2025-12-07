@@ -32,7 +32,7 @@ public class LeaveGroupCommandHandler : IRequestHandler<LeaveGroupCommand>
         if (!conversation.Participants.Contains(request.UserId))
             throw new UnauthorizedAccessException("You are not a member of this group.");
         
-        if (conversation.Type != ConversationType.group)
+        if (conversation.Type != ConversationType.Group)
             throw new Exception("Cannot leave a direct conversation.");
 
         // Lấy thông tin User để ghi log tên người rời đi
@@ -69,6 +69,7 @@ public class LeaveGroupCommandHandler : IRequestHandler<LeaveGroupCommand>
         {
             Content = systemMsgContent,
             Sender = Guid.Empty, // System Sender
+            MessageType =  MessageType.System,
             CreatedAt = DateTime.UtcNow
         };
         conversation.UpdatedAt = DateTime.UtcNow;

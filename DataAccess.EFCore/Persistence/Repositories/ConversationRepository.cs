@@ -18,7 +18,7 @@ public class ConversationRepository : GenericRepository<Conversation>, IConversa
         // Cách an toàn nhất mà không cần sửa DB config phức tạp:
         
         var conversations = await _dbContext.Conversation
-            .Where(c => c.Type == ConversationType.direct)
+            .Where(c => c.Type == ConversationType.Direct)
             .ToListAsync(); // Tải về RAM (nếu dữ liệu lớn cần tối ưu sau)
 
         // 2. Lọc thủ công trong RAM

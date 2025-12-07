@@ -11,5 +11,6 @@ public interface IGenericRepository<T> where T : class
     void AddRange(IEnumerable<T> entities);
     void Remove(T entity);
     void RemoveRange(IEnumerable<T> entities);
+    Task<int> CountAsync(Expression<Func<T, bool>> expression);
     void Update(T entity);
 }

@@ -45,7 +45,7 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
         }
         
         // Kiểm tra 2: Chỉ cho phép thêm vào Group Chat (Chặn Direct Chat)
-        if (conversation.Type != ConversationType.group)
+        if (conversation.Type != ConversationType.Group)
         {
             throw new Exception("Cannot add members to a direct conversation. Please create a new group.");
         }
@@ -68,12 +68,12 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
 
         // (Tùy chọn - Recommended) Kiểm tra các ID này có tồn tại trong bảng Users không
         // Để tránh lưu ID rác vào JSON
-        /*
+        
         var existingUsersCount = await _unitOfWork.UserRepository
             .CountAsync(u => validNewMembers.Contains(u.Id)); 
         if (existingUsersCount != validNewMembers.Count) 
              throw new Exception("Some user IDs are invalid.");
-        */
+        
 
         // --- 5. Update State ---
         conversation.Participants.AddRange(validNewMembers);
@@ -82,6 +82,7 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
         conversation.LastMessage = new LastMessageInfo
         {
             Content = $"Added {validNewMembers.Count} new member(s).",
+            MessageType = MessageType.System,
             Sender = request.RequestorId,
             CreatedAt = DateTime.UtcNow
         };
@@ -95,6 +96,7 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
             Id = Guid.NewGuid(),
             ConversationId = request.ConversationId,
             SenderId = request.RequestorId, // Hoặc một Guid System đặc biệt
+            MessageType = MessageType.System,
             Content = systemMessageContent,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

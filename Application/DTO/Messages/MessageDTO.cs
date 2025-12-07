@@ -12,6 +12,7 @@ public class MessageDto
     public string ReceiverName { get; set; }
     public string ReceiverAvatarUrl { get; set; }
     public string Content { get; set; }
-    public MessageType Type { get; set; }
+    public List<string> MediaUrls { get; set; }
+    public MessageType MessageType { get; set; }
     public DateTime CreatedAt { get; set; }
 }

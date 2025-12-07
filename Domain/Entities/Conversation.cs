@@ -15,8 +15,8 @@ public class Conversation : BaseEntity
 
 public enum ConversationType
 {
-    direct, 
-    group
+    Direct, 
+    Group
 }
 
 
@@ -29,6 +29,7 @@ public class GroupCreationInfo
 public class LastMessageInfo
 {
     public string Content { get; set; }
+    public MessageType MessageType { get; set; }
     public DateTime CreatedAt { get; set; }
     public Guid Sender { get; set; }
 }

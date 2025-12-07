@@ -25,7 +25,7 @@ public class KickMemberCommandHandler : IRequestHandler<KickMemberCommand>
         if (conversation == null) throw new Exception("Conversation not found");
 
         // 2. Kiểm tra quyền Admin (Chỉ người tạo nhóm mới được kick)
-        if (conversation.Type != ConversationType.group) throw new Exception("This is not a group chat");
+        if (conversation.Type != ConversationType.Group) throw new Exception("This is not a group chat");
         
         if (conversation.Group.CreatedBy != request.AdminId)
             throw new UnauthorizedAccessException("Only the group admin can kick members.");

@@ -23,7 +23,7 @@ public class ChangeGroupNameCommandHandler : IRequestHandler<ChangeGroupNameComm
         var conversation = await _unitOfWork.ConversationRepository.GetById(request.ConversationId);
         if (conversation == null) throw new Exception("Conversation not found");
 
-        if (conversation.Type != ConversationType.group) throw new Exception("Only groups can be renamed");
+        if (conversation.Type != ConversationType.Group) throw new Exception("Only groups can be renamed");
 
         // Validate: Người đổi tên phải là thành viên nhóm
         if (!conversation.Participants.Contains(request.RequestorId))
@@ -42,6 +42,7 @@ public class ChangeGroupNameCommandHandler : IRequestHandler<ChangeGroupNameComm
         {
             Content = content,
             Sender = Guid.Empty,
+            MessageType = MessageType.System,
             CreatedAt = DateTime.UtcNow
         };
         conversation.UpdatedAt = DateTime.UtcNow;

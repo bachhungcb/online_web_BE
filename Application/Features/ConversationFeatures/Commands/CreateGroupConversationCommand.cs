@@ -45,7 +45,7 @@ public class CreateGroupConversationCommandHandler : IRequestHandler<CreateGroup
         var newGroup = new Conversation
         {
             Id = Guid.NewGuid(),
-            Type = ConversationType.group,
+            Type = ConversationType.Group,
             Participants = participants,
             Group = new GroupCreationInfo 
             { 
