@@ -66,17 +66,17 @@ public class ConversationController : BaseApiController
     /// <summary>
     /// Thêm thành viên vào nhóm chat
     /// </summary>
-    /// <param name="id">ID của cuộc trò chuyện (Nhóm)</param>
+    /// <param name="conversationId">ID của cuộc trò chuyện (Nhóm)</param>
     /// <param name="dto">Danh sách ID thành viên cần thêm</param>
-    [HttpPost("{id:guid}/members")]
-    public async Task<IActionResult> AddMemberToGroup([FromRoute] Guid id, [FromBody] AddMemberToGroupDto dto)
+    [HttpPost("{conversationId:guid}/members")]
+    public async Task<IActionResult> AddMemberToGroup([FromRoute] Guid conversationId, [FromBody] AddMemberToGroupDto dto)
     {
         var currentUserId = CurrentUserId; // Lấy từ Token (BaseApiController)
         if (currentUserId == Guid.Empty) return Unauthorized();
 
         // Map từ Route + Body + Token sang Command
         var command = new AddMemberToGroupCommand(
-            ConversationId: id,
+            ConversationId: conversationId,
             NewMemberIds: dto.MemberIds,
             RequestorId: currentUserId
         );
@@ -119,13 +119,13 @@ public class ConversationController : BaseApiController
     /// <summary>
     /// Rời khỏi nhóm chat
     /// </summary>
-    [HttpDelete("{id:guid}/leave")]
-    public async Task<IActionResult> LeaveGroup([FromRoute] Guid id)
+    [HttpDelete("{groupId:guid}/leave")]
+    public async Task<IActionResult> LeaveGroup([FromRoute] Guid groupId)
     {
         var currentUserId = CurrentUserId;
         if (currentUserId == Guid.Empty) return Unauthorized();
 
-        var command = new LeaveGroupCommand(id, currentUserId);
+        var command = new LeaveGroupCommand(groupId, currentUserId);
 
         try
         {
@@ -143,13 +143,13 @@ public class ConversationController : BaseApiController
     }
     
     // 1. API KICK MEMBER
-    [HttpPost("{id:guid}/kick")]
-    public async Task<IActionResult> KickMember([FromRoute] Guid id, [FromBody] KickMemberDto dto)
+    [HttpPost("{memberId:guid}/kick")]
+    public async Task<IActionResult> KickMember([FromRoute] Guid memberId, [FromBody] KickMemberDto dto)
     {
         var currentUserId = CurrentUserId;
         if (currentUserId == Guid.Empty) return Unauthorized();
 
-        var command = new KickMemberCommand(id, currentUserId, dto.MemberId);
+        var command = new KickMemberCommand(memberId, currentUserId, dto.MemberId);
 
         try
         {
@@ -166,21 +166,21 @@ public class ConversationController : BaseApiController
         }
     }
     
-    [HttpPost("{id:guid}/read")]
-    public async Task<IActionResult> MarkAsRead(Guid id)
+    [HttpPost("{conversationId:guid}/read")]
+    public async Task<IActionResult> MarkAsRead([FromRoute]Guid conversationId)
     {
-        await _mediator.Send(new MarkConversationAsReadCommand(id, CurrentUserId));
+        await _mediator.Send(new MarkConversationAsReadCommand(conversationId, CurrentUserId));
         return Ok(new { message = "Marked as read" });
     }
 
     // 2. API CHANGE GROUP NAME
-    [HttpPut("{id:guid}/group/name")]
-    public async Task<IActionResult> ChangeGroupName([FromRoute] Guid id, [FromBody] ChangeGroupNameDto dto)
+    [HttpPut("{groupId:guid}/group/name")]
+    public async Task<IActionResult> ChangeGroupName([FromRoute] Guid groupId, [FromBody] ChangeGroupNameDto dto)
     {
         var currentUserId = CurrentUserId;
         if (currentUserId == Guid.Empty) return Unauthorized();
 
-        var command = new ChangeGroupNameCommand(id, currentUserId, dto.NewGroupName);
+        var command = new ChangeGroupNameCommand(groupId, currentUserId, dto.NewGroupName);
 
         try
         {
@@ -194,13 +194,13 @@ public class ConversationController : BaseApiController
     }
     
     
-    [HttpPut("{id:guid}/group/avatar")]
-    public async Task<IActionResult> ChangeGroupAvatar([FromRoute] Guid id, [FromBody] ChangeGroupAvatarDto dto)
+    [HttpPut("{groupId:guid}/group/avatar")]
+    public async Task<IActionResult> ChangeGroupAvatar([FromRoute] Guid groupId, [FromBody] ChangeGroupAvatarDto dto)
     {
         var currentUserId = CurrentUserId;
         if (currentUserId == Guid.Empty) return Unauthorized();
 
-        var command = new ChangeGroupAvatarCommand(id, currentUserId, dto.Avatar);
+        var command = new ChangeGroupAvatarCommand(groupId, currentUserId, dto.Avatar);
 
         try
         {
