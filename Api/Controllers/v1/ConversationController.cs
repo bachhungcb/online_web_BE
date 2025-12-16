@@ -165,9 +165,16 @@ public class ConversationController : BaseApiController
             return BadRequest(new { message = ex.Message });
         }
     }
+    
+    [HttpPost("{id:guid}/read")]
+    public async Task<IActionResult> MarkAsRead(Guid id)
+    {
+        await _mediator.Send(new MarkConversationAsReadCommand(id, CurrentUserId));
+        return Ok(new { message = "Marked as read" });
+    }
 
     // 2. API CHANGE GROUP NAME
-    [HttpPut("{id:guid}/name")]
+    [HttpPut("{id:guid}/group/name")]
     public async Task<IActionResult> ChangeGroupName([FromRoute] Guid id, [FromBody] ChangeGroupNameDto dto)
     {
         var currentUserId = CurrentUserId;
@@ -179,6 +186,26 @@ public class ConversationController : BaseApiController
         {
             await _mediator.Send(command);
             return Ok(new { message = "Group name updated successfully", newName = dto.NewGroupName });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+    
+    
+    [HttpPut("{id:guid}/group/avatar")]
+    public async Task<IActionResult> ChangeGroupAvatar([FromRoute] Guid id, [FromBody] ChangeGroupAvatarDto dto)
+    {
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        var command = new ChangeGroupAvatarCommand(id, currentUserId, dto.Avatar);
+
+        try
+        {
+            await _mediator.Send(command);
+            return Ok(new { message = "Group avatar updated successfully", newAvatar = dto.Avatar });
         }
         catch (Exception ex)
         {

@@ -5,37 +5,36 @@ using MediatR;
 
 namespace Application.Features.ConversationFeatures.Commands;
 
-public record ChangeGroupNameCommand(Guid ConversationId, Guid RequestorId, string NewName) : IRequest;
+public record ChangeGroupAvatarCommand(Guid ConversationId, Guid RequestorId, string NewAvatar) : IRequest;
 
-public class ChangeGroupNameCommandHandler : IRequestHandler<ChangeGroupNameCommand>
+public class ChangeGroupAvatarCommandHandler : IRequestHandler<ChangeGroupAvatarCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHubService _hubService;
 
-    public ChangeGroupNameCommandHandler(IUnitOfWork unitOfWork, IHubService hubService)
+    public ChangeGroupAvatarCommandHandler(IUnitOfWork unitOfWork, IHubService hubService)
     {
         _unitOfWork = unitOfWork;
         _hubService = hubService;
     }
 
-    public async Task Handle(ChangeGroupNameCommand request, CancellationToken cancellationToken)
+    public async Task Handle(ChangeGroupAvatarCommand request, CancellationToken cancellationToken)
     {
         var conversation = await _unitOfWork.ConversationRepository.GetById(request.ConversationId);
         if (conversation == null) throw new Exception("Conversation not found");
 
-        if (conversation.Type != ConversationType.Group) throw new Exception("Only groups can be renamed");
-
+        
         // Validate: Người đổi tên phải là thành viên nhóm
         if (!conversation.Participants.Contains(request.RequestorId))
             throw new UnauthorizedAccessException("You are not a member of this group");
 
         // Logic đổi tên
-        conversation.Group.Name = request.NewName;
+        conversation.Group.Name = request.NewAvatar;
 
         // Tạo tin nhắn hệ thống
         var requestor = await _unitOfWork.UserRepository.GetById(request.RequestorId);
         string requestorName = requestor?.UserName ?? "Someone";
-        string content = $"{requestorName} changed group name to \"{request.NewName}\".";
+        string content = $"{requestorName} changed group avatar to \"{request.NewAvatar}\".";
 
         conversation.LastMessage = new LastMessageInfo
         {
@@ -67,7 +66,7 @@ public class ChangeGroupNameCommandHandler : IRequestHandler<ChangeGroupNameComm
             ConversationId = request.ConversationId,
             Content = content,
             Type = MessageType.System,
-            NewGroupName = request.NewName, // Để FE cập nhật Header ngay lập tức
+            NewGroupAvatar = request.NewAvatar, // Để FE cập nhật Header ngay lập tức
             Timestamp = DateTime.UtcNow
         });
     }
