@@ -23,6 +23,7 @@ public enum ConversationType
 public class GroupCreationInfo
 {
     public string Name { get; set; }
+    public string GroupAvatar { get; set; }
     public Guid CreatedBy { get; set; }
 }
 

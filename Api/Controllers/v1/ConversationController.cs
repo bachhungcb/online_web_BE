@@ -50,7 +50,7 @@ public class ConversationController : BaseApiController
         var senderId = CurrentUserId; // Lấy từ Token
         if (senderId == Guid.Empty) return Unauthorized();
 
-        var command = new CreateGroupConversationCommand(senderId, dto.GroupName, dto.MemberIds);
+        var command = new CreateGroupConversationCommand(senderId, dto.GroupName, dto.GroupAvatar, dto.MemberIds);
 
         try
         {

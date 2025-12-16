@@ -66,7 +66,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 // Bạn có thể tùy chỉnh tên cột nếu muốn
                 ownedNavigationBuilder.Property(groupInfo => groupInfo.Name)
                     .HasColumnName("GroupName"); // Cột trong DB sẽ là 'GroupName'
-
+                ownedNavigationBuilder.Property(groupInfo => groupInfo.GroupAvatar)
+                    .HasColumnName("GroupAvatar");
                 ownedNavigationBuilder.Property(groupInfo => groupInfo.CreatedBy) // Sửa lỗi chính tả từ CreadtedBy
                     .HasColumnName("GroupCreatedBy"); // Cột trong DB sẽ là 'GroupCreatedBy'
             });

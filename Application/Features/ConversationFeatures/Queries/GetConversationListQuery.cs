@@ -95,7 +95,7 @@ public class GetConversationListQueryHandler
             if (convo.Type == ConversationType.Group)
             {
                 name = convo.Group?.Name ?? "Unnamed Group";
-                // avatar = convo.Group.AvatarUrl ... (nếu có)
+                avatar = convo.Group?.GroupAvatar ?? "";
             }
             else // Direct
             {

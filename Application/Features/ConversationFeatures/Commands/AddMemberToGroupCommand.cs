@@ -110,6 +110,7 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
         var signalRMessage = new
         {
             SenderId = request.RequestorId,
+            NewMembers = validNewMembers,
             // Với tin nhắn hệ thống, ReceiverId có thể không quan trọng hoặc để null
             ReceiverId = Guid.Empty, 
             Content = systemMessageContent,

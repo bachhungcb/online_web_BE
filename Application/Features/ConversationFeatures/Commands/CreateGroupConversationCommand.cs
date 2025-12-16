@@ -7,6 +7,7 @@ namespace Application.Features.ConversationFeatures.Commands;
 public record CreateGroupConversationCommand(
     Guid CreatorId,
     string GroupName,
+    string GAvatar,
     List<Guid> MemberIds
 ) : IRequest<Guid>;
 
@@ -50,6 +51,7 @@ public class CreateGroupConversationCommandHandler : IRequestHandler<CreateGroup
             Group = new GroupCreationInfo 
             { 
                 Name = request.GroupName, 
+                GroupAvatar =  request.GAvatar,
                 CreatedBy = request.CreatorId 
             },
             // Khởi tạo LastMessage rỗng
