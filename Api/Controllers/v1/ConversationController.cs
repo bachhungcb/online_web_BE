@@ -40,7 +40,27 @@ public class ConversationController : BaseApiController
             return BadRequest(new { message = ex.Message });
         }
     }
+    /// <summary>
+    /// Create random conversation
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> CreateRandomConversation()
+    {
+        var senderId = CurrentUserId;
+        if (senderId == Guid.Empty) return Unauthorized();
 
+        var command = new CreateRandomConversationCommand(senderId);
+
+        try
+        {
+            var conversationId = await _mediator.Send(command);
+            return Ok(new { conversationId });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
     /// <summary>
     /// Tạo nhóm chat mới
     /// </summary>

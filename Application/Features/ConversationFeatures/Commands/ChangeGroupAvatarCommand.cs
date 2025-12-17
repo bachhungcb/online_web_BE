@@ -29,12 +29,12 @@ public class ChangeGroupAvatarCommandHandler : IRequestHandler<ChangeGroupAvatar
             throw new UnauthorizedAccessException("You are not a member of this group");
 
         // Logic đổi tên
-        conversation.Group.Name = request.NewAvatar;
+        conversation.Group.GroupAvatar = request.NewAvatar;
 
         // Tạo tin nhắn hệ thống
         var requestor = await _unitOfWork.UserRepository.GetById(request.RequestorId);
         string requestorName = requestor?.UserName ?? "Someone";
-        string content = $"{requestorName} changed group avatar to \"{request.NewAvatar}\".";
+        string content = $"{requestorName} changed group avatar.";
 
         conversation.LastMessage = new LastMessageInfo
         {
