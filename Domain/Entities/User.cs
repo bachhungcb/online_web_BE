@@ -26,5 +26,6 @@ public class User : BaseEntity
     //For password reset
     public string? PasswordResetToken { get; set; }
     public DateTime? ResetTokenExpires { get; set; }
-    
+    public bool IsOnline { get; set; } = false; // Trạng thái online/offline lưu DB 
+    public DateTime LastActive { get; set; } = DateTime.UtcNow; // Thời gian online cuối
 }

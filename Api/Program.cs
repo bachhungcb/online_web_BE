@@ -97,7 +97,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTools();
 builder.Services.AddScoped<IHubService, HubService>();
 builder.Services.AddSignalR();
-
+builder.Services.AddSingleton<PresenceTracker>();
 #endregion
 
 #region API Versioning

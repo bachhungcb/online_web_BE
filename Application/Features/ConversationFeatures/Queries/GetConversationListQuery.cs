@@ -60,7 +60,9 @@ public class GetConversationListQueryHandler
                     {
                         Id = u.Id,
                         UserName = u.UserName,
-                        AvatarUrl = u.AvatarUrl
+                        AvatarUrl = u.AvatarUrl,
+                        IsOnline = u.IsOnline,
+                        LastActive = u.LastActive,
                     };
                 }).ToList();
             
