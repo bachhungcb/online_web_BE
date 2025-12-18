@@ -156,6 +156,18 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+var webRootPath = app.Environment.WebRootPath;
+if (string.IsNullOrEmpty(webRootPath)) 
+{
+    // Nếu WebRootPath null (do thư mục không tồn tại), ta gán thủ công
+    webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    Directory.CreateDirectory(webRootPath);
+    app.Environment.WebRootPath = webRootPath;
+}
+else if (!Directory.Exists(webRootPath))
+{
+    Directory.CreateDirectory(webRootPath);
+}
 app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
