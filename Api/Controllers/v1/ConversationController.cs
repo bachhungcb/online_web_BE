@@ -43,7 +43,7 @@ public class ConversationController : BaseApiController
     /// <summary>
     /// Create random conversation
     /// </summary>
-    [HttpPost]
+    [HttpPost("random")]
     public async Task<IActionResult> CreateRandomConversation()
     {
         var senderId = CurrentUserId;
