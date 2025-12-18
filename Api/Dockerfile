@@ -41,3 +41,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Api.dll"]
+
+RUN mkdir -p wwwroot
