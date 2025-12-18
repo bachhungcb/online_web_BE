@@ -9,3 +9,5 @@ services:
       - "42070:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Warning
+      - Logging__LogLevel__Microsoft=Warning
