@@ -50,12 +50,21 @@ public class ChatHub : Hub
     
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var userId = Guid.Parse(Context.User.FindFirst("id")?.Value);
+        // 1. Lấy chuỗi ID ra trước
+        var idValue = Context.User?.FindFirst("id")?.Value;
 
-        // 1. Cập nhật Tracker
+        // 2. Kiểm tra nếu null hoặc không phải Guid hợp lệ thì bỏ qua
+        if (string.IsNullOrEmpty(idValue) || !Guid.TryParse(idValue, out Guid userId))
+        {
+            await base.OnDisconnectedAsync(exception);
+            return;
+        }
+
+        // --- Code logic cũ của bạn ---
+        // 3. Cập nhật Tracker
         var isOffline = await _tracker.UserDisconnected(userId);
 
-        // 2. Nếu đã thoát hết tab -> Update DB LastActive & Bắn thông báo
+        // 4. Nếu đã thoát hết tab -> Update DB & Bắn thông báo
         if (isOffline)
         {
             using (var scope = _serviceProvider.CreateScope())
