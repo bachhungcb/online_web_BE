@@ -1,8 +1,10 @@
 ﻿using System.Reflection.Metadata;
+using Application.DTO.Users;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Service;
 using Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.ConversationFeatures.Commands;
 
@@ -87,7 +89,23 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
             CreatedAt = DateTime.UtcNow
         };
         conversation.UpdatedAt = DateTime.UtcNow;
-
+        
+        var newMemberDtos = await _unitOfWork.UserRepository.GetAllAsQueryable()
+            .AsNoTracking() // Tối ưu hiệu năng vì chỉ để đọc (Read-only)
+            .Where(u => validNewMembers.Contains(u.Id))
+            .Select(u => new UserSummaryDto 
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                AvatarUrl = u.AvatarUrl
+            })
+            .ToListAsync(cancellationToken);
+        
+        if (newMemberDtos.Count != validNewMembers.Count)
+        {
+            // Log warning hoặc throw exception tùy business logic
+            throw new Exception("Some users not found.");
+        }
         // --- 6. Save to DB ---
         _unitOfWork.ConversationRepository.Update(conversation);
         
@@ -110,7 +128,7 @@ public class AddMemberToGroupCommandHandler : IRequestHandler<AddMemberToGroupCo
         var signalRMessage = new
         {
             SenderId = request.RequestorId,
-            NewMembers = validNewMembers,
+            NewMembers = newMemberDtos,
             // Với tin nhắn hệ thống, ReceiverId có thể không quan trọng hoặc để null
             ReceiverId = Guid.Empty, 
             Content = systemMessageContent,
