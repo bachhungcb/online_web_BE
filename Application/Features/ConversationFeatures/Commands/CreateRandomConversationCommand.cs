@@ -1,4 +1,6 @@
-﻿using Application.Features.UserFeatures.Queries;
+﻿using Application.DTO.Conversations;
+using Application.DTO.Users;
+using Application.Features.UserFeatures.Queries;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using MediatR;
@@ -7,9 +9,9 @@ namespace Application.Features.ConversationFeatures.Commands;
 
 public record CreateRandomConversationCommand(
     Guid SenderId
-) : IRequest<Guid>;
+) : IRequest<ConversationSummaryDto>;
 
-public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRandomConversationCommand, Guid>
+public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRandomConversationCommand, ConversationSummaryDto>
 {
     private readonly IMediator _mediator;
     private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +23,7 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
     }
 
 
-    public async Task<Guid> Handle(CreateRandomConversationCommand request, CancellationToken cancellationToken)
+    public async Task<ConversationSummaryDto> Handle(CreateRandomConversationCommand request, CancellationToken cancellationToken)
     {
         var userIds = await _mediator.Send(new GetListUserIdQuery(request.SenderId), cancellationToken);
 
@@ -43,7 +45,29 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
         var receiver = await _unitOfWork.UserRepository.GetById(receiverId);
         if (receiver == null)
             throw new Exception("User not found");
+        
+        var sender = await _unitOfWork.UserRepository.GetById(request.SenderId);
+        if (sender == null)
+            throw new Exception("sender not found");
+        
+        var receiverDto = new UserSummaryDto
+        {
+            Id = receiver.Id,
+            AvatarUrl = receiver.AvatarUrl,
+            IsOnline = receiver.IsOnline,
+            LastActive = receiver.LastActive,
+            UserName = receiver.UserName,
+        };
 
+        var senderDto = new UserSummaryDto
+        {
+            Id = sender.Id,
+            AvatarUrl = sender.AvatarUrl,
+            IsOnline = sender.IsOnline,
+            LastActive = sender.LastActive,
+            UserName = sender.UserName,
+        };
+        
         // 3. Kiểm tra xem đã có cuộc trò chuyện cũ chưa
         var existingConversation = await _unitOfWork.ConversationRepository
             .GetDirectConversationAsync(request.SenderId, receiverId);
@@ -51,7 +75,14 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
         if (existingConversation != null)
         {
             // Nếu đã có, trả về ID cũ luôn (không tạo mới)
-            return existingConversation.Id;
+            var dto = new ConversationSummaryDto
+            {
+                ConversationId =  existingConversation.Id,
+                Receiver = receiverDto,
+                Sender = senderDto,
+            };
+            // Nếu đã có, trả về ID cũ luôn (không tạo mới)
+            return dto;
         }
 
         // 4. Nếu chưa có, tạo mới
@@ -77,6 +108,13 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
         _unitOfWork.ConversationRepository.Add(newConversation);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return newConversation.Id;
+        var summaryDto = new ConversationSummaryDto
+        {
+            ConversationId =  newConversation.Id,
+            Receiver = receiverDto,
+            Sender = senderDto,
+        };
+        
+        return summaryDto;
     }
 }
