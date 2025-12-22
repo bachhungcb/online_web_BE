@@ -61,8 +61,8 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             if (receiverId != Guid.Empty)
             {
                 // Check bạn bè
-                var isFriend = await _unitOfWork.FriendRepository.IsFriendAsync(request.SenderId, receiverId);
-                if (!isFriend) throw new Exception("Message sending failed. You are not friends with this user.");
+                // var isFriend = await _unitOfWork.FriendRepository.IsFriendAsync(request.SenderId, receiverId);
+                // if (!isFriend) throw new Exception("Message sending failed. You are not friends with this user.");
             
                 // Lấy info người nhận
                 var receiverUser = await _unitOfWork.UserRepository.GetById(receiverId);

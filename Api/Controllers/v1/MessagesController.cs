@@ -35,7 +35,10 @@ public class MessagesController : BaseApiController
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
         }
 
         // 2. Gửi Real-time qua SignalR
