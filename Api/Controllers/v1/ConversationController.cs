@@ -32,8 +32,13 @@ public class ConversationController : BaseApiController
 
         try
         {
-            var conversationId = await _mediator.Send(command);
-            return Ok(new { conversationId });
+            var result = await _mediator.Send(command);
+            return Ok(new
+            {
+                conversationId = result.ConversationId,
+                name = result.Name,
+                avatarUrl = result.AvatarUrl,
+            });
         }
         catch (Exception ex)
         {
@@ -53,8 +58,13 @@ public class ConversationController : BaseApiController
 
         try
         {
-            var conversationId = await _mediator.Send(command);
-            return Ok(new { conversationId });
+            var result = await _mediator.Send(command);
+            return Ok(new
+            {
+                conversationId = result.ConversationId,
+                name = result.Name,
+                avatarUrl = result.AvatarUrl,
+            });
         }
         catch (Exception ex)
         {
