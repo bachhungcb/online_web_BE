@@ -7,6 +7,7 @@ public interface IUnitOfWork : IDisposable
    IFriendRequestRepository  FriendRequestRepository { get; }
    IMessageRepository MessageRepository { get; }
    IConversationRepository ConversationRepository { get; }
+   IMessageReactionRepository MessageReactionRepository { get; }
    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
    Task<int> Complete();
 }

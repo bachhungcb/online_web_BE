@@ -53,23 +53,6 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
         if (sender == null)
             throw new Exception("sender not found");
         
-        var receiverDto = new UserSummaryDto
-        {
-            Id = receiver.Id,
-            AvatarUrl = receiver.AvatarUrl,
-            IsOnline = receiver.IsOnline,
-            LastActive = receiver.LastActive,
-            UserName = receiver.UserName,
-        };
-
-        var senderDto = new UserSummaryDto
-        {
-            Id = sender.Id,
-            AvatarUrl = sender.AvatarUrl,
-            IsOnline = sender.IsOnline,
-            LastActive = sender.LastActive,
-            UserName = sender.UserName,
-        };
         
         // 3. Kiểm tra xem đã có cuộc trò chuyện cũ chưa
         var existingConversation = await _unitOfWork.ConversationRepository
@@ -81,15 +64,15 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
             var dto = new ConversationSummaryDto
             {
                 ConversationId =  existingConversation.Id,
-                Receiver = receiverDto,
-                Sender = senderDto,
+                Name = receiver.UserName,
+                AvatarUrl =  receiver.AvatarUrl,
             };
             
             var realTimeMsg = new
             {
                 ConversationId = existingConversation.Id,
-                Receiver = receiverDto,
-                Sender = senderDto,
+                Name = receiver.UserName,
+                AvatarUrl =  receiver.AvatarUrl,
             };
 
             await _hubService.SendMessageToGroupAsync(existingConversation.Id.ToString(), realTimeMsg);
@@ -124,15 +107,15 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
         var summaryDto = new ConversationSummaryDto
         {
             ConversationId =  newConversation.Id,
-            Receiver = receiverDto,
-            Sender = senderDto,
+            Name = receiver.UserName,
+            AvatarUrl =  receiver.AvatarUrl,
         };
         // 5. Sending signalr
         var signalRMessage = new
         {
             ConversationId = newConversation.Id,
-            Receiver = receiverDto,
-            Sender = senderDto,
+            Name = receiver.UserName,
+            AvatarUrl =  receiver.AvatarUrl,
         };
         await _hubService.SendMessageToGroupAsync(newConversation.Id.ToString(), signalRMessage);
 

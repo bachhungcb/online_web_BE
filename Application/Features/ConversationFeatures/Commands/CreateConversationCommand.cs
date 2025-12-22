@@ -48,14 +48,7 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
             UserName = receiver.UserName,
         };
 
-        var senderDto = new UserSummaryDto
-        {
-            Id = sender.Id,
-            AvatarUrl = sender.AvatarUrl,
-            IsOnline = sender.IsOnline,
-            LastActive = sender.LastActive,
-            UserName = sender.UserName,
-        };
+
         // 3. Kiểm tra xem đã có cuộc trò chuyện cũ chưa
         var existingConversation = await _unitOfWork.ConversationRepository
             .GetDirectConversationAsync(request.SenderId, request.ReceiverId);
@@ -65,15 +58,14 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
             var dto = new ConversationSummaryDto
             {
                 ConversationId = existingConversation.Id,
-                Receiver = receiverDto,
-                Sender = senderDto,
+
             };
 
             var realTimeMsg = new
             {
                 ConversationId = existingConversation.Id,
-                Receiver = receiverDto,
-                Sender = senderDto,
+                Name = receiverDto.UserName,
+                AvatarUrl =  receiver.AvatarUrl,
             };
 
             await _hubService.SendMessageToGroupAsync(existingConversation.Id.ToString(), realTimeMsg);
@@ -108,16 +100,16 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
         var signalRMessage = new
         {
             ConversationId = newConversation.Id,
-            Receiver = receiverDto,
-            Sender = senderDto,
+            Name = receiverDto.UserName,
+            AvatarUrl =  receiver.AvatarUrl,
         };
         await _hubService.SendMessageToGroupAsync(newConversation.Id.ToString(), signalRMessage);
 
         var summaryDto = new ConversationSummaryDto
         {
             ConversationId = newConversation.Id,
-            Receiver = receiverDto,
-            Sender = senderDto,
+            Name = receiverDto.UserName,
+            AvatarUrl =  receiver.AvatarUrl,
         };
 
         return summaryDto;

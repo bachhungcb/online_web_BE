@@ -5,7 +5,6 @@ namespace Application.DTO.Conversations;
 public class ConversationSummaryDto
 {
     public Guid ConversationId { get; set; }
-    
-    public required UserSummaryDto Sender { get; set; }
-    public required UserSummaryDto Receiver { get; set; }
+    public string Name { get; set; } // Receiver Name
+    public string AvatarUrl { get; set; } // Receiver's avt url
 }
