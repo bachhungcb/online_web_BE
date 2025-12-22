@@ -94,4 +94,27 @@ public class MessagesController : BaseApiController
             return BadRequest(new { message = ex.Message });
         }
     }
+    
+    [HttpPost("react")]
+    public async Task<IActionResult> ReactToMessage([FromBody] ReactToMessageDto dto)
+    {
+        var currentUserId = CurrentUserId;
+        if (currentUserId == Guid.Empty) return Unauthorized();
+
+        var command = new ReactToMessageCommand(dto.MessageId, currentUserId, dto.ReactionType);
+    
+        try 
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { message = result });
+        }
+        catch (UnauthorizedAccessException) 
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

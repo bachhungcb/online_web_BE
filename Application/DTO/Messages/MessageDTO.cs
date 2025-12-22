@@ -15,4 +15,15 @@ public class MessageDto
     public List<string> MediaUrls { get; set; }
     public MessageType MessageType { get; set; }
     public DateTime CreatedAt { get; set; }
+    // Group reaction theo Type để đếm số lượng: "Like": 5, "Love": 2
+    public Dictionary<string, int> ReactionsCount { get; set; } 
+    // Hoặc chi tiết user nào thả gì (nếu cần hiển thị tooltip)
+    public List<ReactionDetailDto> Reactions { get; set; }
+}
+
+public class ReactionDetailDto
+{
+    public Guid UserId { get; set; }
+    public string UserName { get; set; }
+    public string ReactionType { get; set; }
 }
