@@ -16,9 +16,11 @@ public class MessageReaction : BaseEntity
 }
 
 public enum ReactionType
-{
-    Like = 0,
-    Dislike = 1,
-    Haha = 2,
-    Love = 3,
-}
+ {
+     Like = 0,
+     Dislike = 1,
+     Haha = 2,
+     Love = 3,
+     Sad = 4,
+     Mad = 5
+ }
