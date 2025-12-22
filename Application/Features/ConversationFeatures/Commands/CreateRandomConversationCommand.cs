@@ -2,6 +2,7 @@
 using Application.DTO.Users;
 using Application.Features.UserFeatures.Queries;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Service;
 using Domain.Entities;
 using MediatR;
 
@@ -15,11 +16,13 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
 {
     private readonly IMediator _mediator;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHubService _hubService;
 
-    public CreateRandomConversationCommandHandler(IUnitOfWork unitOfWork, IMediator mediator)
+    public CreateRandomConversationCommandHandler(IUnitOfWork unitOfWork, IMediator mediator, IHubService hubService)
     {
         _unitOfWork = unitOfWork;
         _mediator = mediator;
+        _hubService = hubService;
     }
 
 
@@ -81,6 +84,16 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
                 Receiver = receiverDto,
                 Sender = senderDto,
             };
+            
+            var realTimeMsg = new
+            {
+                ConversationId = existingConversation.Id,
+                Receiver = receiverDto,
+                Sender = senderDto,
+            };
+
+            await _hubService.SendMessageToGroupAsync(existingConversation.Id.ToString(), realTimeMsg);
+
             // Nếu đã có, trả về ID cũ luôn (không tạo mới)
             return dto;
         }
@@ -114,6 +127,15 @@ public class CreateRandomConversationCommandHandler : IRequestHandler<CreateRand
             Receiver = receiverDto,
             Sender = senderDto,
         };
+        // 5. Sending signalr
+        var signalRMessage = new
+        {
+            ConversationId = newConversation.Id,
+            Receiver = receiverDto,
+            Sender = senderDto,
+        };
+        await _hubService.SendMessageToGroupAsync(newConversation.Id.ToString(), signalRMessage);
+
         
         return summaryDto;
     }
