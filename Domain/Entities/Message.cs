@@ -16,6 +16,7 @@ public class Message : BaseEntity
     public DateTime UpdatedAt { get; set; }
 
     public MessageType MessageType { get; set; } = MessageType.Text;
+    public ICollection<MessageReaction> Reactions { get; set; } = new List<MessageReaction>();
 }
 
 public enum MessageType

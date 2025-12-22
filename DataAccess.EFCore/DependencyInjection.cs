@@ -24,6 +24,7 @@ public static class DependencyInjection
         // 3. THIẾU: Đăng ký IUnitOfWork và Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
     }
     
    

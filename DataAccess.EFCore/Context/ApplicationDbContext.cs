@@ -86,7 +86,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
                 lastMessageBuilder.Property(messageInfo => messageInfo.Sender)
                     .HasColumnName("LastMessageSender");
-                
+
                 lastMessageBuilder.Property(messageInfo => messageInfo.MessageType)
                     .HasColumnName("LastMessageType");
             });
@@ -121,14 +121,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasForeignKey(f => f.UserB)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         modelBuilder.Entity<Message>(builder =>
         {
             // Cấu hình MediaUrls: List<string> <-> JSON String
             builder.Property(m => m.MediaUrls)
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // Chiều ghi vào DB (giữ nguyên)
-                    v => string.IsNullOrEmpty(v) 
+                    v => string.IsNullOrEmpty(v)
                         ? new List<string>() // <--- FIX: Nếu DB rỗng thì trả về List rỗng, KHÔNG Deserialize
                         : JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>()
                 )
@@ -136,6 +136,22 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     (c1, c2) => c1.SequenceEqual(c2),
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c.ToList()));
+        });
+        modelBuilder.Entity<MessageReaction>(entity =>
+        {
+            // Composite Key (Optional): Để đảm bảo 1 User chỉ thả 1 loại reaction cho 1 Message
+            // Nhưng BaseEntity đã có Id riêng nên ta dùng Index để tối ưu query
+            entity.HasIndex(r => new { r.MessageId, r.UserId });
+
+            entity.HasOne(r => r.Message)
+                .WithMany(m => m.Reactions)
+                .HasForeignKey(r => r.MessageId)
+                .OnDelete(DeleteBehavior.Cascade); // Xóa tin nhắn -> Xóa luôn reaction
+
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

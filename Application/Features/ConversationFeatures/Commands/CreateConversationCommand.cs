@@ -1,6 +1,7 @@
 ﻿using Application.DTO.Conversations;
 using Application.DTO.Users;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Service;
 using Domain.Entities;
 using MediatR;
 
@@ -9,18 +10,21 @@ namespace Application.Features.ConversationFeatures.Commands;
 public record CreateConversationCommand(
     Guid SenderId,
     Guid ReceiverId
-    ) : IRequest<ConversationSummaryDto>;
+) : IRequest<ConversationSummaryDto>;
 
 public class CreateConversationCommandHandler : IRequestHandler<CreateConversationCommand, ConversationSummaryDto>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHubService _hubService;
 
-    public CreateConversationCommandHandler(IUnitOfWork unitOfWork)
+    public CreateConversationCommandHandler(IUnitOfWork unitOfWork, IHubService hubService)
     {
         _unitOfWork = unitOfWork;
+        _hubService = hubService;
     }
 
-    public async Task<ConversationSummaryDto> Handle(CreateConversationCommand request, CancellationToken cancellationToken)
+    public async Task<ConversationSummaryDto> Handle(CreateConversationCommand request,
+        CancellationToken cancellationToken)
     {
         // 1. Không thể chat với chính mình
         if (request.SenderId == request.ReceiverId)
@@ -30,7 +34,7 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
         var receiver = await _unitOfWork.UserRepository.GetById(request.ReceiverId);
         if (receiver == null)
             throw new Exception("Receiver not found");
-        
+
         var sender = await _unitOfWork.UserRepository.GetById(request.SenderId);
         if (sender == null)
             throw new Exception("sender not found");
@@ -58,13 +62,21 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
 
         if (existingConversation != null)
         {
-            
             var dto = new ConversationSummaryDto
             {
-                ConversationId =  existingConversation.Id,
+                ConversationId = existingConversation.Id,
                 Receiver = receiverDto,
                 Sender = senderDto,
             };
+
+            var realTimeMsg = new
+            {
+                ConversationId = existingConversation.Id,
+                Receiver = receiverDto,
+                Sender = senderDto,
+            };
+
+            await _hubService.SendMessageToGroupAsync(existingConversation.Id.ToString(), realTimeMsg);
             // Nếu đã có, trả về ID cũ luôn (không tạo mới)
             return dto;
         }
@@ -76,12 +88,13 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
             Participants = new List<Guid> { request.SenderId, request.ReceiverId },
             Type = ConversationType.Direct,
             // Khởi tạo các giá trị required
-            Group = new GroupCreationInfo { Name = "", CreatedBy = Guid.Empty, GroupAvatar = ""}, // Direct chat không cần Group info
+            Group = new GroupCreationInfo
+                { Name = "", CreatedBy = Guid.Empty, GroupAvatar = "" }, // Direct chat không cần Group info
             LastMessage = new LastMessageInfo // Khởi tạo rỗng
-            { 
-                Content = "", 
-                Sender = Guid.Empty, 
-                CreatedAt = DateTime.MinValue 
+            {
+                Content = "",
+                Sender = Guid.Empty,
+                CreatedAt = DateTime.MinValue
             },
             SeenBy = new List<Guid> { request.SenderId }, // Người tạo coi như đã xem
             CreatedAt = DateTime.UtcNow,
@@ -91,13 +104,22 @@ public class CreateConversationCommandHandler : IRequestHandler<CreateConversati
         _unitOfWork.ConversationRepository.Add(newConversation);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var summaryDto = new ConversationSummaryDto
+        // 5. Sending signalr
+        var signalRMessage = new
         {
-            ConversationId =  newConversation.Id,
+            ConversationId = newConversation.Id,
             Receiver = receiverDto,
             Sender = senderDto,
         };
-        
+        await _hubService.SendMessageToGroupAsync(newConversation.Id.ToString(), signalRMessage);
+
+        var summaryDto = new ConversationSummaryDto
+        {
+            ConversationId = newConversation.Id,
+            Receiver = receiverDto,
+            Sender = senderDto,
+        };
+
         return summaryDto;
     }
 }
