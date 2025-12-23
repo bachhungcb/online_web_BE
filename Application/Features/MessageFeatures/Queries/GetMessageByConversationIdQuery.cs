@@ -71,22 +71,38 @@ public class GetMessagesByConversationIdQueryHandler
                     receiverAvatar = receiverUser.AvatarUrl;
                 }
             }
-
-            // 3. Map từ Entity sang DTO
             var messageDtos = messages
                 .Select(m => new MessageDto
                 {
                     Id = m.Id,
                     SenderId = m.SenderId,
-                    SenderName = m.Sender?.UserName ?? "Unknown", // Lấy từ bảng User nhờ .Include()
+                    SenderName = m.Sender?.UserName ?? "Unknown",
                     SenderAvatarUrl = m.Sender?.AvatarUrl,
-                    ReceiverId = receiverId,
-                    ReceiverName = receiverName,
-                    ReceiverAvatarUrl = receiverAvatar,
+                    ReceiverId = receiverId, // Biến từ bên ngoài
+                    ReceiverName = receiverName, // Biến từ bên ngoài
+                    ReceiverAvatarUrl = receiverAvatar, // Biến từ bên ngoài
                     MessageType = m.MessageType,
                     Content = m.Content,
-                    MediaUrls =  m.MediaUrls,
-                    CreatedAt = m.CreatedAt
+                    MediaUrls = m.MediaUrls,
+                    CreatedAt = m.CreatedAt,
+
+                    // 1. Map danh sách chi tiết (List<ReactionDetailDto>)
+                    // Scope là m.Reactions (chỉ reaction của tin nhắn hiện tại)
+                    Reactions = m.Reactions.Select(r => new ReactionDetailDto 
+                    { 
+                        UserId = r.UserId, 
+                        ReactionType = r.ReactionType, 
+                        UserName = r.User.UserName 
+                    }).ToList(),
+
+                    // 2. Map số lượng theo loại (Dictionary<string, int>)
+                    // Logic: Nhóm theo Type -> Lấy Key là Type -> Đếm số lượng trong nhóm
+                    ReactionsCount = m.Reactions
+                        .GroupBy(r => r.ReactionType)
+                        .ToDictionary(
+                            group => group.Key.ToString(),
+                            group => group.Count()
+                        )
                 });
 
             // Nếu làm Chat App, thường ta sẽ Reverse lại list để hiển thị từ cũ đến mới ở Client

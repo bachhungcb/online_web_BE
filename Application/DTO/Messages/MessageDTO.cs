@@ -25,5 +25,5 @@ public class ReactionDetailDto
 {
     public Guid UserId { get; set; }
     public string UserName { get; set; }
-    public string ReactionType { get; set; }
+    public ReactionType ReactionType { get; set; }
 }
