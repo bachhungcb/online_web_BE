@@ -65,8 +65,8 @@ public class ReactToMessageCommandHandler : IRequestHandler<ReactToMessageComman
             };
             _unitOfWork.MessageReactionRepository.Add(newReaction);
             action = "Added";
+            message.Reactions.Add(newReaction);
         }
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 3. Real-time Notification (SignalR)

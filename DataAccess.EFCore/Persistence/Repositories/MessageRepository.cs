@@ -20,6 +20,8 @@ public class MessageRepository : GenericRepository<Message>, IMessageRepository
             .AsNoTracking() // Quan trọng: Tối ưu hiệu năng đọc
             .Where(m => m.ConversationId == conversationId)
             .Include(m => m.Sender) // Include để lấy thông tin SenderName, Avatar
+            .Include(m => m.Reactions)          // 1. Join sang bảng MessageReaction
+            .ThenInclude(r => r.User)
             .OrderByDescending(m => m.CreatedAt) // Lấy tin mới nhất trước
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
