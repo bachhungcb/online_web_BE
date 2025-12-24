@@ -4,20 +4,19 @@ using StreamChat.Clients;
 
 namespace Application.Features.VideoCallFeatures.Command;
 
-public record CreateVideoCallTokenCommand(Guid senderId):IRequest<string>;
-
-public class CreateVideoCallTokenHander : IRequestHandler<CreateVideoCallTokenCommand, string>
+public record CreateVideoCallTokenCommand(List<Guid> UserIds):IRequest<Dictionary<Guid,string>>;
+public class CreateVideoCallTokenHandler : IRequestHandler<CreateVideoCallTokenCommand, Dictionary<Guid, string>>
 {
 
     private readonly IConfiguration _configuration;
 
-    public CreateVideoCallTokenHander(IConfiguration configuration)
+    public CreateVideoCallTokenHandler(IConfiguration configuration)
     {
 
         _configuration = configuration;
     }
     
-    public async Task<string> Handle(CreateVideoCallTokenCommand request, CancellationToken cancellationToken)
+    public async Task<Dictionary<Guid,string>> Handle(CreateVideoCallTokenCommand request, CancellationToken cancellationToken)
     {
         // Lấy config và kiểm tra null ngay lập tức (Fail Fast)
         string apiKey = _configuration["VideoCallApi:ApiKey"] 
@@ -26,11 +25,16 @@ public class CreateVideoCallTokenHander : IRequestHandler<CreateVideoCallTokenCo
                            ?? throw new InvalidOperationException("VideoCallApi:Secret is not configured.");
         
         var factory = new StreamClientFactory(apiKey, apiSecret);
-        
         var userClient = factory.GetUserClient();
         
-        var token = userClient.CreateToken(request.senderId.ToString());
+        var tokens = new Dictionary<Guid, string>();
         
-        return token;
+        foreach (var userId in request.UserIds)
+        {
+            var token = userClient.CreateToken(userId.ToString());
+            tokens.Add(userId, token);
+        }
+        
+        return tokens;
     }
 }
