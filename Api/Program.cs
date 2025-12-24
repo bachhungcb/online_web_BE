@@ -78,7 +78,8 @@ builder.Services.AddCors(options =>
             policy
                 .WithOrigins("http://localhost:3000",
                     "http://localhost:5173",
-                    "http://localhost:5126") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
+                    "http://localhost:5126",
+                    "http://scic.navistar.io:42068") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials(); // <--- BẮT BUỘC PHẢI CÓ CHO SIGNALR
