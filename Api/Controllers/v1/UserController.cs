@@ -68,6 +68,25 @@ public class UserController : BaseApiController
         }
     }
 
+    [HttpGet("list-id")]
+    public async Task<IActionResult> GetListId([FromQuery] PaginationFilter filter)
+    {
+        try
+        {
+            var route = Request.Path.Value;
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            var response = (await _mediator.Send(new GetListUserIdQuery())).ToList();
+            var totalRecords = response.Count;
+            return Ok(new { UserList = response, TotalRecords = totalRecords });
+        }catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
+    }
+    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(Guid id)
     {
