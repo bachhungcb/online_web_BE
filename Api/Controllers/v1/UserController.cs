@@ -27,51 +27,102 @@ public class UserController : BaseApiController
     [HttpPost]
     public async Task<IActionResult> CreateUser(CreateUserCommand command)
     {
+        try
+        {
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
+
         return Ok(new Response<Guid>(await _mediator.Send(command)));
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllUsers([FromQuery] PaginationFilter filter)
     {
-        var route = Request.Path.Value;
-        var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
-        var response = (await _mediator.Send(new GetAllUserQuery(validFilter.PageNumber, validFilter.PageSize)))
-            .ToList();
-        var totalRecords = response.Count;
-        var returnResponse =
-            PaginationHelper.CreatePagedReponse<User>(response,
-                validFilter,
-                totalRecords,
-                _uriService,
-                route);
-        return Ok(new { UserList = returnResponse });
+        try
+        {
+            var route = Request.Path.Value;
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            var response = (await _mediator.Send(new GetAllUserQuery(validFilter.PageNumber, validFilter.PageSize)))
+                .ToList();
+            var totalRecords = response.Count;
+            var returnResponse =
+                PaginationHelper.CreatePagedReponse<User>(response,
+                    validFilter,
+                    totalRecords,
+                    _uriService,
+                    route);
+            return Ok(new { UserList = returnResponse });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(Guid id)
     {
-        return Ok(await _mediator.Send(new GetUserByIdQuery(id)));
+        try
+        {
+            return Ok(await _mediator.Send(new GetUserByIdQuery(id)));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
-        return Ok(await _mediator.Send(new DeleteUserByIdCommand { Id = id }));
+        try
+        {
+            return Ok(await _mediator.Send(new DeleteUserByIdCommand { Id = id }));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UpdateUserDto dto)
     {
-        var command = new UpdateUserCommand
+        try
         {
-            Id = id,
-            UserName = dto.UserName,
-            FullName = dto.FullName,
-            Email = dto.Email,
-            AvatarUrl = dto.AvatarUrl,
-            Bio = dto.Bio,
-            Phone = dto.Phone
-        };
-        return Ok(await _mediator.Send(command));
+            var command = new UpdateUserCommand
+            {
+                Id = id,
+                UserName = dto.UserName,
+                FullName = dto.FullName,
+                Email = dto.Email,
+                AvatarUrl = dto.AvatarUrl,
+                Bio = dto.Bio,
+                Phone = dto.Phone
+            };
+            return Ok(await _mediator.Send(command));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
     }
 }

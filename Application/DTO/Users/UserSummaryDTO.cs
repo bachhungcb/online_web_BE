@@ -1,4 +1,7 @@
-﻿namespace Application.DTO.Users;
+﻿using Application.DTO.Friends;
+using Domain.Entities;
+
+namespace Application.DTO.Users;
 
 public class UserSummaryDto 
 {
@@ -7,4 +10,6 @@ public class UserSummaryDto
     public string AvatarUrl { get; set; }
     public bool IsOnline { get; set; }
     public DateTime LastActive { get; set; }
+    
+    public ICollection<FriendDto> Friends { get; set; }
 }

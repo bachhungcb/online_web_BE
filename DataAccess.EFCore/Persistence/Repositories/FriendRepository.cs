@@ -36,4 +36,19 @@ public class FriendRepository : GenericRepository<Friend>, IFriendRepository
             (f.UserA == userId2 && f.UserB == userId1)
             );
     }
+    
+    public async Task<IEnumerable<Friend>> GetListFriendByUserIdAsync(Guid userId)
+    {
+        // Giả định logic: User có thể nằm ở cột SenderId hoặc ReceiverId
+        // Và cần Include thông tin của người bạn đó (User còn lại)
+    
+        return await _dbContext.Friends
+            .Include(f => f.UserA)
+            .Include(f => f.UserB)
+            .Where(x => (Equals(x.UserA, userId) || Equals(x.UserB, userId))) 
+            // Lưu ý: Thông thường bạn bè phải có trạng thái Accepted. 
+            // Nếu Entity Friend của bạn không có cột Status (mà tách ra bảng Request), thì bỏ qua điều kiện Status.
+            // Dựa trên file Friend.cs bạn gửi, nó có vẻ là bảng kết quả sau khi accept.
+            .ToListAsync();
+    }
 }
