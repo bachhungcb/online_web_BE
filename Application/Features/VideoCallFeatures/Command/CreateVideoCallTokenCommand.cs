@@ -19,10 +19,10 @@ public class CreateVideoCallTokenHandler : IRequestHandler<CreateVideoCallTokenC
     public async Task<Dictionary<Guid,string>> Handle(CreateVideoCallTokenCommand request, CancellationToken cancellationToken)
     {
         // Lấy config và kiểm tra null ngay lập tức (Fail Fast)
-        string apiKey = _configuration["VideoCallApi:ApiKey"] 
-                        ?? throw new InvalidOperationException("VideoCallApi:ApiKey is not configured.");
-        string apiSecret = _configuration["VideoCallApi:Secret"] 
-                           ?? throw new InvalidOperationException("VideoCallApi:Secret is not configured.");
+        string apiKey = _configuration["VideoCall:ApiKey"] 
+                        ?? throw new InvalidOperationException("VideoCall:ApiKey is not configured.");
+        string apiSecret = _configuration["VideoCall:Secret"] 
+                           ?? throw new InvalidOperationException("VideoCall:Secret is not configured.");
         
         var factory = new StreamClientFactory(apiKey, apiSecret);
         var userClient = factory.GetUserClient();

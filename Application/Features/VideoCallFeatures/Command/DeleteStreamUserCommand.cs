@@ -17,8 +17,8 @@ public class DeleteStreamUserHandler : IRequestHandler<DeleteStreamUserCommand, 
 
     public async Task<bool> Handle(DeleteStreamUserCommand request, CancellationToken cancellationToken)
     {
-        string apiKey = _configuration["VideoCallApi:ApiKey"]!;
-        string apiSecret = _configuration["VideoCallApi:Secret"]!;
+        string apiKey = _configuration["VideoCall:ApiKey"]!;
+        string apiSecret = _configuration["VideoCall:ApiSecret"]!;
 
         var factory = new StreamClientFactory(apiKey, apiSecret);
         var userClient = factory.GetUserClient();

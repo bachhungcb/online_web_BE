@@ -1,3 +1,4 @@
+using Application.Features.UserFeatures.Commands;
 using Application.Features.VideoCallFeatures.Command;
 using Asp.Versioning;
 using MediatR;
@@ -45,7 +46,20 @@ public class VideoCallController :BaseApiController
             return BadRequest(new { error = ex.Message });
         }
     }
-
+    // API đồng bộ user thủ công (thường dùng cho Admin hoặc khi user update profile)
+    [HttpPost("sync-user-batch")]
+    public async Task<IActionResult> SyncUserBatch([FromBody] UpsertBatchStreamUsercommand command)
+    {
+        try
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { Success = result, Message = "User synced with Stream provider." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
     // API xóa user (Hard Delete)
     [HttpDelete("user/{userId}")]
     public async Task<IActionResult> DeleteUser(Guid userId)

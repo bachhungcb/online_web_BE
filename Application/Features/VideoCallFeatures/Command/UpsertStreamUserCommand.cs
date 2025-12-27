@@ -18,12 +18,12 @@ public class UpsertStreamUserHandler : IRequestHandler<UpsertStreamUserCommand, 
 
     public async Task<bool> Handle(UpsertStreamUserCommand request, CancellationToken cancellationToken)
     {
-        string apiKey = _configuration["VideoCallApi:ApiKey"]!;
-        string apiSecret = _configuration["VideoCallApi:Secret"]!;
+        string apiKey = _configuration["VideoCall:ApiKey"]!;
+        string apiSecret = _configuration["VideoCall:Secret"]!;
 
         var factory = new StreamClientFactory(apiKey, apiSecret);
         var userClient = factory.GetUserClient();
-
+        
         // Mapping dữ liệu sang User Object của Stream SDK
         var streamUser = new UserRequest()
         {
