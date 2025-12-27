@@ -45,7 +45,10 @@ public record GetUserByIdQuery(Guid userId) : IRequest<UserSummaryDto>
                 IsOnline = user.IsOnline,
                 LastActive = user.LastActive,
                 UserName = user.UserName,
-                // Friends = user.Friendships <-- Đã xóa dòng gây lỗi này
+                FullName = user.FullName,
+                Email = user.Email,
+                Bio = user.Bio,
+                PhoneNumber = user.Phone
             };
     
             // 3. Lấy danh sách Friend Entity kèm thông tin user liên quan (FriendA/FriendB)
