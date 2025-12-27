@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Features.VideoCallFeatures.Command;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +20,14 @@ public class UpdateUserCommand : IRequest<Guid>
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Guid>
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public UpdateUserCommandHandler(IUnitOfWork unitOfWork)
+        private readonly IMediator _mediator;
+        
+        public UpdateUserCommandHandler(
+            IUnitOfWork unitOfWork,
+            IMediator mediator)
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         public async Task<Guid> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -43,6 +48,18 @@ public class UpdateUserCommand : IRequest<Guid>
                 user.Phone = request.Phone;
                 user.UpdatedAt = updatedAt;
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
+                
+                try
+                {
+                    await _mediator.Send(new UpsertStreamUserCommand(
+                        user.Id,
+                        user.UserName
+                    ), cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi đồng bộ Stream User: {ex.Message}");
+                }
                 return user.Id;
             }
         }
