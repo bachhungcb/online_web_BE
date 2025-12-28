@@ -21,7 +21,7 @@ public class CreateVideoCallTokenHandler : IRequestHandler<CreateVideoCallTokenC
         // Lấy config và kiểm tra null ngay lập tức (Fail Fast)
         string apiKey = _configuration["VideoCall:ApiKey"] 
                         ?? throw new InvalidOperationException("VideoCall:ApiKey is not configured.");
-        string apiSecret = _configuration["VideoCall:Secret"] 
+        string apiSecret = _configuration["VideoCall:ApiSecret"] 
                            ?? throw new InvalidOperationException("VideoCall:Secret is not configured.");
         
         var factory = new StreamClientFactory(apiKey, apiSecret);
