@@ -118,7 +118,7 @@ public class GetConversationListQueryHandler
                 Name = name,
                 AvatarUrl = avatar,
                 LastMessageContent = convo.LastMessage?.Content ?? "Start a conversation",
-                LastMessageTime = convo.LastMessage?.CreatedAt ?? convo.CreatedAt,
+                LastMessageTime = DateTime.SpecifyKind(convo.LastMessage?.CreatedAt?? convo.CreatedAt, DateTimeKind.Utc),
                 LastMessageSenderName = lastSenderName,
                 LastMessageSenderId = lastSenderId,
                 LastMessageSenderAvatarUrl = lastSenderAvatarUrl,
