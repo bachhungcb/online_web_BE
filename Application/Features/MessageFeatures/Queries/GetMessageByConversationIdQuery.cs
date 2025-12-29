@@ -84,7 +84,7 @@ public class GetMessagesByConversationIdQueryHandler
                     MessageType = m.MessageType,
                     Content = m.Content,
                     MediaUrls = m.MediaUrls,
-                    CreatedAt = m.CreatedAt,
+                    CreatedAt = DateTime.SpecifyKind(m.CreatedAt, DateTimeKind.Utc),
 
                     // 1. Map danh sách chi tiết (List<ReactionDetailDto>)
                     // Scope là m.Reactions (chỉ reaction của tin nhắn hiện tại)

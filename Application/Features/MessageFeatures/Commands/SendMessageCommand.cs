@@ -88,8 +88,8 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
             Content = request.Content,
             MediaUrls = request.MediaUrls,
             MessageType = request.Type,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
         };
 
         // 3. Cập nhật LastMessage cho Conversation (Để hiển thị ở danh sách chat)
