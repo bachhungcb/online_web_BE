@@ -148,7 +148,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Mes
         
             Content = request.Content,
             MediaUrls = mediaUrls, // Trả về list media để FE hiển thị ngay
-            CreatedAt = message.CreatedAt,
+            CreatedAt = DateTime.SpecifyKind(message.CreatedAt, DateTimeKind.Utc),
         };
     }
 }
