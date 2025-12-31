@@ -22,7 +22,7 @@ public class LocalFileService : IFileService
 
 
         // 1. Validate: Using magic numbers
-        var allowExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".docx" };
+        var allowExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".docx", ".txt", "doc", ".xlsx" };
         var extension = Path.GetExtension(file.FileName).ToLower();
 
         if (!allowExtensions.Contains(extension))
