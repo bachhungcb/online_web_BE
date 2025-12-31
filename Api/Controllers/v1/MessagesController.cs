@@ -47,6 +47,7 @@ public class MessagesController : BaseApiController
             .SendAsync("ReceiveMessage", new
             {
                 SenderId = senderId,
+                MessageId = result.MessageId,
                 senderAvatarUrl =  result.SenderAvatarUrl,
                 receiverId = result.ReceiverId,
                 receiverUserName = result.ReceiverUserName,
