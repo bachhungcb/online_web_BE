@@ -79,7 +79,8 @@ builder.Services.AddCors(options =>
                 .WithOrigins("http://localhost:3000",
                     "http://localhost:5173",
                     "http://localhost:5126",
-                    "http://scic.navistar.io:42068") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
+                    "http://scic.navistar.io:42068",
+                    "https://scic.navistar.io") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials(); // <--- BẮT BUỘC PHẢI CÓ CHO SIGNALR
@@ -150,6 +151,25 @@ builder.Services.AddAuthentication(options =>
 
             ValidateIssuer = false, // Không kiểm tra người phát hành
             ValidateAudience = false
+        };
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // SignalR gửi token qua query string tên là "access_token"
+                var accessToken = context.Request.Query["access_token"];
+
+                // Nếu request đi vào đường dẫn bắt đầu bằng /chathub
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/chathub")))
+                {
+                    // Gán token vào Context để .NET xác thực
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
