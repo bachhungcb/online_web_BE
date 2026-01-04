@@ -80,7 +80,8 @@ builder.Services.AddCors(options =>
                     "http://localhost:5173",
                     "http://localhost:5126",
                     "http://scic.navistar.io:42068",
-                    "https://scic.navistar.io") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
+                    "https://scic.navistar.io",
+                    "https://scic.navistar.io/chathub") // Đổi thành URL Frontend của bạn (React/Vue/Angular)
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials(); // <--- BẮT BUỘC PHẢI CÓ CHO SIGNALR
