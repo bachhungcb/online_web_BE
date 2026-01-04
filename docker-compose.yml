@@ -19,8 +19,8 @@ services:
       - "80:80"   # Mở port 80 cho EC2
       - "443:443" # Mở port 443 cho EC2
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro         # Mount file cấu hình
-      - ./certs:/etc/nginx/certs:ro                   # Mount thư mục chứa cert
+      - /etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro         # Mount file cấu hình
+      - /etc/nginx/certs:/etc/nginx/certs:ro                   # Mount thư mục chứa cert
     depends_on:
       - api
     networks:
