@@ -80,6 +80,7 @@ public class LeaveGroupCommandHandler : IRequestHandler<LeaveGroupCommand>
             Id = Guid.NewGuid(),
             ConversationId = request.ConversationId,
             SenderId = request.UserId, // Hoặc để null/Guid.Empty tùy quy ước
+            MessageType = MessageType.System,
             Content = systemMsgContent,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -97,6 +98,7 @@ public class LeaveGroupCommandHandler : IRequestHandler<LeaveGroupCommand>
         {
             Content = systemMsgContent,
             conversationId = request.ConversationId,
+            MessageType = MessageType.System,
             Timestamp = DateTime.UtcNow,
             IsSystemMessage = true,
             LeftUserId = request.UserId, // Để FE biết mà xóa avatar user này khỏi UI
