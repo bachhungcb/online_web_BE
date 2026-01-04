@@ -4,10 +4,29 @@ services:
     build:
       context: .
       dockerfile: Api/Dockerfile
-    ports:
-      - "42069:8080"
-      - "42070:8081"
+    container_name: online_web_api
     environment:
+      - ASPNETCORE_HTTP_PORTS=80
       - ASPNETCORE_ENVIRONMENT=Development
       - Logging__LogLevel__Default=Warning
       - Logging__LogLevel__Microsoft=Warning
+    networks:
+      - app_network
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"   # Mở port 80 cho EC2
+      - "443:443" # Mở port 443 cho EC2
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro         # Mount file cấu hình
+      - ./certs:/etc/nginx/certs:ro                   # Mount thư mục chứa cert
+    depends_on:
+      - api
+    networks:
+      - app_network
+    
+networks:
+  app_network:
+    driver: bridge
+
