@@ -190,6 +190,13 @@ else if (!Directory.Exists(webRootPath))
 {
     Directory.CreateDirectory(webRootPath);
 }
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | 
+                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto | 
+                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedHost
+});
 app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
