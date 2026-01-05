@@ -22,33 +22,65 @@ public class AuthController : BaseApiController
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
-        var token = await _mediator.Send(command);
+        try
+        {
+            var token = await _mediator.Send(command);
 
-        return Ok(new { Token = token });
+            return Ok(new { Token = token });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
-        var userId = await _mediator.Send(command);
+        try
+        {
+            var userId = await _mediator.Send(command);
 
-        return Ok(new { UserId = userId });
+            return Ok(new { UserId = userId });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
+
     }
 
     [HttpPost("reset-password-mail")]
     public async Task<IActionResult> SendResetPasswordMail([FromBody] ForgotPasswordDto dto)
     {
-        // 1. Create command from dto
-        var command = new SendResetPasswordMailCommand { Email = dto.Email };
-
-        // 2. Send command to Handler
-        await _mediator.Send(command);
-
-
-        return Ok(new
+        try
         {
-            Message = "We have send you a reset password email"
-        });
+            // 1. Create command from dto
+            var command = new SendResetPasswordMailCommand { Email = dto.Email };
+
+            // 2. Send command to Handler
+            await _mediator.Send(command);
+
+
+            return Ok(new
+            {
+                Message = "We have send you a reset password email"
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                error = ex.Message
+            });
+        }
+       
     }
 
     [HttpPost("reset-password")]
